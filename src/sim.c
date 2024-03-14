@@ -1,26 +1,36 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include <stdbool.h>
+
 #include "shell.h"
+
 
 #define Opcode_mask 0x7F000000    //para 0001011 (adds entre 2 registros)
 
 
+
+bool is_add_immediate(uint32_t opcode) { return ((opcode & (0xFF << 24)) >> 24) == 0x91; }
+bool is_add_ext_register(uint32_t opcode) { return ((opcode & (0xFFF << 21)) >> 21) == 0b10001011001; }   //opcode= 10001011001
+bool is_adds_immediate(uint32_t opcode) { return ((opcode & (0xFF << 24)) >> 24) == 0b10110001; }
+
+
+bool is_opcode_len_5(uint32_t opcode) { return ((opcode & (0x1F << 24)) >> 24) == 0b10101; }
+
+array_opcodes = [0x91, 0b10001011001, 0b10110001]; 
+
 int get_opcode(uint32_t instruction){
-    return (unsigned int)(instruction & Opcode_mask);
+    
 }
 
 void decode(uint32_t instruction){
-    uint32_t adds_immediate_opcode = 0b10110001;
+    //uint32_t adds_immediate_opcode = 0b10110001;  // aunque agregue mas bits da igual el &
+    //uint32_t adds_ext_register_opcode = 0b10101011001;
+    printf("adds_immediate_opcode: {%d}\n", adds_immediate_opcode);
     uint32_t adds_ext_register_opcode = 0b1010101100;  //son 10 bits el opcode
     if(get_opcode(instruction) == adds_immediate_opcode){
         printf("adds\n");
-        NEXT_STATE.REGS[0] = 200; 
     }
-
-
-
-
 }
 
 
@@ -36,12 +46,16 @@ void process_instruction()
      * */
     uint32_t instruction = mem_read_32(CURRENT_STATE.PC);
     decode(instruction);
-    printf("instruction: %x\n", instruction);
+    
     CURRENT_STATE.PC = CURRENT_STATE.PC + 4;
     //ecode()
     
 
 }
+
+
+
+
 /*
 cd inputs
 cat *.s  -> imprime cualquier archivo que tiene .s
@@ -68,6 +82,8 @@ los corchetes indican memoria
 lsl: shift left. lsl x1, x1,16 -> x1 = x1 << 16
 
 
+input 10 -1  le resto 1 al registro 10
 
-
+ver qué pasa si una instrucción tiene bits después del opcode de forma que se pueda confundir con otro opcode
+no pasaría nada porque no puede haber opcode de algo dentro de otro
 */

@@ -7,10 +7,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
-
+#include <stdbool.h>
 
 #define Opcode_mask_add_immediate 0xFF    // Máscara para los últimos 7 bits
 #define Opcode_mask_add_ext_register 0xFFF    // Máscara para los últimos 11 bits
+
+
+bool is_add_immediate(uint32_t opcode) { return ((opcode & (0xFF << 24)) >> 24) == 0x91; }
+bool is_add_ext_register(uint32_t opcode) { return ((opcode & (0xFFF << 21)) >> 21) == 0b10001011001; }   //opcode= 10001011001
 
 int get_opcode(uint32_t instruction){
     printf("instruction: %d\n", instruction);
@@ -30,7 +34,7 @@ void decode(uint32_t instruction){
 }
 
 int main(){
-    uint32_t instruction = 0b10110001;
+    uint32_t instruction = 0b10010001000000000000000000000000;
     decode(instruction);
     printf("instruction: %d\n", instruction);
     return 0;
@@ -38,3 +42,19 @@ int main(){
 
 // gcc -o pruba pruba.c
 
+
+
+int main() {
+  if (is_add(0b10010001000000000000000000000000)) {
+    printf("Es un add\n");
+  } else {
+    printf("No es un add\n");
+  }
+
+  if (is_add(0b10010001000000000000000000000000)) {
+    printf("Es un add\n");
+  } else {
+    printf("No es un add\n");
+  }
+  return 0;
+}
