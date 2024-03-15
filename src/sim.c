@@ -16,7 +16,7 @@
 
 
 void adds_imm(uint32_t instruction){   //adds immediate
-    uint32_t immediate = (instruction & (0x11111111111 << 10)) >> 10;
+    uint32_t immediate = (instruction & (0xFFF << 10)) >> 10;
     uint32_t dest_register = instruction & 0x1F;
     uint32_t n_register = (instruction & (0x1F << 5)) >> 5;
     uint32_t shift = (instruction & (0x3 << 22)) >> 22;
@@ -70,7 +70,7 @@ void adds_ext_register(uint32_t instruction){   //adds extended register
 
 
 void subs_imm(uint32_t instruction){   //adds immediate
-    uint32_t immediate = (instruction & (0x11111111111 << 10)) >> 10;
+    uint32_t immediate = (instruction & (0xFFF << 10)) >> 10;
     uint32_t dest_register = instruction & 0x1F;
     uint32_t n_register = (instruction & (0x1F << 5)) >> 5;
     uint32_t shift = (instruction & (0x3 << 22)) >> 22;
