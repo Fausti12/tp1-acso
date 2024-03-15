@@ -15,22 +15,41 @@ bool is_add_ext_register(uint32_t opcode) { return ((opcode & (0xFFF << 21)) >> 
 bool is_adds_immediate(uint32_t opcode) { return ((opcode & (0xFF << 24)) >> 24) == 0b10110001; }
 
 
-bool is_opcode_len_5(uint32_t opcode) { return ((opcode & (0x1F << 24)) >> 24) == 0b10101; }
+bool mask_opcode(uint32_t instruction, int len_opcode) { 
+    printf("0xfff: %d\n", 0xfff);
+    return ((instruction & (0xFFF << (20 - len_opcode))) >> (20 - len_opcode)); }  //0xfff pq supongo que opcode tiene menos de 12 bits
+// muevo 20 para que me queden los 12 bits de la mask
 
-array_opcodes = [0x91, 0b10001011001, 0b10110001]; 
 
+bool mask_opcode_2(uint32_t instruction, int len_opcode) { 
+    printf("0xfff: %d\n", 0xfff);
+    printf("0x1f: %d\n", 0xF);
+    printf("0x1f <<1: %d\n", 0xF<<28);   //reconoce con signo   si hago <<32 da 0
+    printf(" instruction & (0xF << 1): %d\n", (instruction & (0xFF << 24))>>24);
+    printf("0x91 %d\n", 0x91);
+    return ((instruction & (0xF)) ) ; } 
+
+
+
+int array_opcodes[] = {0x91, 0b10001011001, 0b10110001}; 
+// 0x91 -> add immediate  0b10001011001 -> add extended register  0b10110001 -> adds immediate
 int get_opcode(uint32_t instruction){
     
 }
 
 void decode(uint32_t instruction){
-    //uint32_t adds_immediate_opcode = 0b10110001;  // aunque agregue mas bits da igual el &
-    //uint32_t adds_ext_register_opcode = 0b10101011001;
-    printf("adds_immediate_opcode: {%d}\n", adds_immediate_opcode);
-    uint32_t adds_ext_register_opcode = 0b1010101100;  //son 10 bits el opcode
-    if(get_opcode(instruction) == adds_immediate_opcode){
-        printf("adds\n");
-    }
+    printf("Instruction: %d\n", instruction);
+    for (int i=5; i < 11; i++){
+        uint32_t mask_result = mask_opcode_2(0x00000091, i);
+        printf("Mask result: %d\n", mask_result);
+        for (int j=0; j < sizeof(array_opcodes); j++){
+            if (mask_result == array_opcodes[j]){
+                printf("Opcode: %d\n", mask_result);
+                printf("Opcode: %d\n", array_opcodes[j]);
+            }
+        }
+            
+    }   
 }
 
 
