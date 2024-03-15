@@ -1,85 +1,192 @@
-#include <stdio.h>
-#include <assert.h>
-#include <string.h>
-#include <stdbool.h>
 
 #include "shell.h"
+//#include "./instructions/adds_imm.h"
+#include <assert.h>
+#include <inttypes.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// execute functions * pongo funciones para cada instrucción
 
 
-#define Opcode_mask 0x7F000000    //para 0001011 (adds entre 2 registros)
+uint32_t array_opcodes[] = {0xb1, 0xab, 0xf0};  // 10110001, 10101011, 11110000
 
 
 
-bool is_add_immediate(uint32_t opcode) { return ((opcode & (0xFF << 24)) >> 24) == 0x91; }
-bool is_add_ext_register(uint32_t opcode) { return ((opcode & (0xFFF << 21)) >> 21) == 0b10001011001; }   //opcode= 10001011001
-bool is_adds_immediate(uint32_t opcode) { return ((opcode & (0xFF << 24)) >> 24) == 0b10110001; }
+void adds_imm(uint32_t instruction){   //adds immediate
+    uint32_t immediate = (instruction & (0x11111111111 << 10)) >> 10;
+    uint32_t dest_register = instruction & 0x1F;
+    uint32_t n_register = (instruction & (0x1F << 5)) >> 5;
+    uint32_t shift = (instruction & (0x3 << 22)) >> 22;
+    printf("d_reg = %d ", dest_register);
+    printf("n_reg = %d ", n_register);
+    printf("imm = %d ", immediate);
+    printf("shift = %d\n", shift);
 
+    if (shift == 0b01){
+        immediate = immediate << 12;
 
-bool mask_opcode(uint32_t instruction, int len_opcode) { 
-    printf("0xfff: %d\n", 0xfff);
-    return ((instruction & (0xFFF << (20 - len_opcode))) >> (20 - len_opcode)); }  //0xfff pq supongo que opcode tiene menos de 12 bits
-// muevo 20 para que me queden los 12 bits de la mask
-
-
-bool mask_opcode_2(uint32_t instruction, int len_opcode) { 
-    printf("0xfff: %d\n", 0xfff);
-    printf("0x1f: %d\n", 0xF);
-    printf("0x1f <<1: %d\n", 0xF<<28);   //reconoce con signo   si hago <<32 da 0
-    printf(" instruction & (0xF << 24) >> 24: %d\n", (instruction & (0xFF << 24))>>24);
-    printf("0x91 %d\n", 0x91);
-    if (((instruction & (0xFF << 24))>>24) == 0x91){
-        printf("es 0x91\n");   // acá me dan iguales
     }
-    return ((instruction & (0xFF << 24))>>24); } 
-
-
-
-int array_opcodes[] = {0x91, 0b10001011001, 0b10110001}; 
-// 0x91 -> add immediate  0b10001011001 -> add extended register  0b10110001 -> adds immediate
-int get_opcode(uint32_t instruction){
     
-}
 
-void decode(uint32_t instruction){
-    printf("Instruction: %d\n", instruction);
-    for (int i=5; i < 11; i++){
+    NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] + immediate;
 
-
-        uint32_t mask_result = mask_opcode_2(0x91000000, i);
-        if (mask_result == 0x91){
-            printf("Opcode Opcode : %d\n", mask_result);  //acá no me dan iguales
-        }
-
-
-        printf("Mask result: %d\n", mask_result);
-        for (int j=0; j < sizeof(array_opcodes); j++){
-            if (mask_result == array_opcodes[j]){
-                printf("Opcode: %d\n", mask_result);
-                printf("Opcode: %d\n", array_opcodes[j]);
-            }
-        }
-            
-    }   
+    if (NEXT_STATE.REGS[dest_register] < 0){
+        NEXT_STATE.FLAG_N = 1;
+    } else if (NEXT_STATE.REGS[dest_register] == 0){
+        NEXT_STATE.FLAG_Z = 1;
+    }
 }
 
 
-void process_instruction()
-{
-    /* execute one instruction here. You should use CURRENT_STATE and modify
-     * values in NEXT_STATE. You can call mem_read_32() and mem_write_32() to
-     * access memory. 
-     * 
-     * Sugerencia: hagan una funcion para decode()
-     *             y otra para execute()
-     * 
-     * */
-    uint32_t instruction = mem_read_32(CURRENT_STATE.PC);
-    decode(instruction);
-    
-    CURRENT_STATE.PC = CURRENT_STATE.PC + 4;
-    //ecode()
+
+
+void adds_ext_register(uint32_t instruction){   //adds extended register
+    uint32_t immediate = (instruction & (0x7 << 10)) >> 10;
+    uint32_t dest_register = instruction & 0x1F;
+    uint32_t n_register = (instruction & (0x1F << 5)) >> 5;
+    uint32_t option = (instruction & (0x7 << 13)) >> 13;
+    uint32_t m_register = (instruction & (0x1F << 16)) >> 16;
+
+    printf("d_reg = %d ", dest_register);
+    printf("n_reg = %d ", n_register);
+    printf("imm = %d ", immediate);
+    printf("option = %d ", option);
+    printf("m_reg = %d\n", m_register);
+
+  
+    NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] + NEXT_STATE.REGS[m_register];
+
+    if (NEXT_STATE.REGS[dest_register] < 0){
+        NEXT_STATE.FLAG_N = 1;
+    } else if (NEXT_STATE.REGS[dest_register] == 0){
+        NEXT_STATE.FLAG_Z = 1;
+    }
+}
+
+
+
+
+void subs_imm(uint32_t instruction){   //adds immediate
+    uint32_t immediate = (instruction & (0x11111111111 << 10)) >> 10;
+    uint32_t dest_register = instruction & 0x1F;
+    uint32_t n_register = (instruction & (0x1F << 5)) >> 5;
+    uint32_t shift = (instruction & (0x3 << 22)) >> 22;
+    printf("d_reg = %d ", dest_register);
+    printf("n_reg = %d ", n_register);
+    printf("imm = %d ", immediate);
+    printf("shift = %d\n", shift);
+
+    if (shift == 0b01){
+        immediate = immediate << 12;
+
+    }
     
 
+    NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] - immediate;
+
+    if (NEXT_STATE.REGS[dest_register] < 0){
+        NEXT_STATE.FLAG_N = 1;
+    } else if (NEXT_STATE.REGS[dest_register] == 0){
+        NEXT_STATE.FLAG_Z = 1;
+    }
+}
+
+
+
+
+
+
+// FUNCIONES PARA SABER SI UN OPCODE ES TAL INSTRUCCION O NO
+bool is_adds_imm(uint32_t opcode) { 
+    printf("El opcode imm es %x\n", (opcode & (0xFF << 24)) >> 24);
+    return (((opcode & (0xFF << 24)) >> 24) == 0xb1);   //10110001
+}
+bool is_adds_ext(uint32_t opcode) { 
+    printf("El opcode ext es %x\n", (opcode & (0xFF << 24)) >> 24);
+    return (((opcode & (0xFF << 24)) >> 24) == 0xab);    //10101011
+}
+
+bool is_subs_imm(uint32_t instruction) {   //VER
+    printf("El opcode subs imm es %x\n", (instruction & (0xFF << 24)) >> 24);
+    printf("first 8 inst = %x\n", (instruction << 24));
+    return (((instruction & (0xFF << 24)) >> 24) == 0xf0);   //11110000  (el ult es 0?)
+}
+
+
+// SE RETORNA EL OPCODE
+uint32_t decode(uint32_t instruction) {
+  // Extract the opcode from the instruction
+  uint32_t opcode = 0;
+  if (is_adds_imm(instruction)) {
+    printf("Entra al adds imm\n");
+    opcode = 0xb1;
+  } 
+  else if (is_adds_ext(instruction)) {
+    printf("Entra al adds ext\n");
+    opcode = 0xab;
+  }
+  else if (is_subs_imm(instruction)) {
+    printf("Entra al subs imm\n");
+    opcode = 0xf0;
+  }
+  return opcode;
+}
+
+// VIENDO EL OPCODE RETORNADO DECIDO QUE ACCION TOMAR
+void execute(uint32_t opcode, uint32_t instruction) {
+  // Execute the instruction
+  if (opcode == 0xb1) {
+    printf("Entra al imm\n");
+    // Adds immediate
+    adds_imm(instruction);
+  } 
+  else if (opcode == 0xab){
+    // Adds extended register
+    //adds_ext(instruction);
+    printf("Tengo que sumar adds ext");
+    adds_ext_register(instruction);
+    
+
+  } 
+  
+  else if (opcode == 0xf0){
+    // Substracts immediate
+    printf("Tengo que restar subs imm");
+    subs_imm(instruction);
+    
+    }
+  else{
+    printf("No se ejecuto nada\n");
+  }
+  return;
+}
+
+void process_instruction() {
+  /* execute one instruction here. You should use CURRENT_STATE and modify
+   * values in NEXT_STATE. You can call mem_read_32() and mem_write_32() to
+   * access memory.
+   *
+   * Sugerencia: hagan una funcion para decode()
+   *             y otra para execute()
+   *
+   * */
+
+  printf("array opcodes: %x\n", array_opcodes[0]);
+  uint32_t instruction = mem_read_32(CURRENT_STATE.PC); // Here we have the 32 bits instruction
+  printf("Instruction: %x\n", instruction);
+  // Decode the instruction
+  uint32_t opcode = decode(instruction);
+
+  // Execute the instruction
+  execute(opcode, instruction);
+
+  // Update the PC
+  NEXT_STATE.PC += 4;
+  
+  return;
 }
 
 
@@ -115,4 +222,6 @@ input 10 -1  le resto 1 al registro 10
 
 ver qué pasa si una instrucción tiene bits después del opcode de forma que se pueda confundir con otro opcode
 no pasaría nada porque no puede haber opcode de algo dentro de otro
+
+de las x instrucciones tengo que hacer 5 decodes ponele ya que varia el opcode entre 5 largos
 */
