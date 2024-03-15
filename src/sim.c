@@ -11,7 +11,7 @@
 // execute functions * pongo funciones para cada instrucción
 
 
-uint32_t array_opcodes[] = {0xb1, 0xab, 0xf0};  // 10110001, 10101011, 11110000
+//uint32_t array_opcodes[3] = [0xb1, 0xab, 0xf0];  // 10110001, 10101011, 11110000
 
 
 
@@ -20,10 +20,10 @@ void adds_imm(uint32_t instruction){   //adds immediate
     uint32_t dest_register = instruction & 0x1F;
     uint32_t n_register = (instruction & (0x1F << 5)) >> 5;
     uint32_t shift = (instruction & (0x3 << 22)) >> 22;
-    printf("d_reg = %d ", dest_register);
-    printf("n_reg = %d ", n_register);
-    printf("imm = %d ", immediate);
-    printf("shift = %d\n", shift);
+    printf("d_reg = %x ", dest_register);
+    printf("n_reg = %x ", n_register);
+    printf("imm = %x ", immediate);
+    printf("shift = %x\n", shift);
 
     if (shift == 0b01){
         immediate = immediate << 12;
@@ -95,7 +95,28 @@ void subs_imm(uint32_t instruction){   //adds immediate
 }
 
 
+void subs_ext_register(uint32_t instruction){   //adds extended register
+    uint32_t immediate = (instruction & (0x7 << 10)) >> 10;
+    uint32_t dest_register = instruction & 0x1F;
+    uint32_t n_register = (instruction & (0x1F << 5)) >> 5;
+    uint32_t option = (instruction & (0x7 << 13)) >> 13;
+    uint32_t m_register = (instruction & (0x1F << 16)) >> 16;
 
+    printf("d_reg = %d ", dest_register);
+    printf("n_reg = %d ", n_register);
+    printf("imm = %d ", immediate);
+    printf("option = %d ", option);
+    printf("m_reg = %d\n", m_register);
+
+  
+    NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] - NEXT_STATE.REGS[m_register];
+
+    if (NEXT_STATE.REGS[dest_register] < 0){
+        NEXT_STATE.FLAG_N = 1;
+    } else if (NEXT_STATE.REGS[dest_register] == 0){
+        NEXT_STATE.FLAG_Z = 1;
+    }
+}
 
 
 
@@ -115,6 +136,10 @@ bool is_subs_imm(uint32_t instruction) {   //VER
     return (((instruction & (0xFF << 24)) >> 24) == 0xf0);   //11110000  (el ult es 0?)
 }
 
+bool is_subs_ext(uint32_t opcode) { 
+    printf("El opcode subs ext es %x\n", (opcode & (0xFFF << 22)) >> 22);
+    return (((opcode & (0xFFF << 22)) >> 22) == 0b11101011001);    //11101011001
+}
 
 // SE RETORNA EL OPCODE
 uint32_t decode(uint32_t instruction) {
@@ -131,6 +156,10 @@ uint32_t decode(uint32_t instruction) {
   else if (is_subs_imm(instruction)) {
     printf("Entra al subs imm\n");
     opcode = 0xf0;
+  }
+  else if (is_subs_ext(instruction)) {
+    printf("Entra al subs ext\n");
+    opcode = 0b11101011001;
   }
   return opcode;
 }
@@ -158,6 +187,11 @@ void execute(uint32_t opcode, uint32_t instruction) {
     subs_imm(instruction);
     
     }
+  else if (opcode == 0b11101011001){
+    // Substracts extended register
+    printf("Tengo que restar subs ext");
+    subs_ext_register(instruction);
+  }
   else{
     printf("No se ejecuto nada\n");
   }
@@ -174,7 +208,7 @@ void process_instruction() {
    *
    * */
 
-  printf("array opcodes: %x\n", array_opcodes[0]);
+  //printf("array opcodes: %x\n", array_opcodes[0]);
   uint32_t instruction = mem_read_32(CURRENT_STATE.PC); // Here we have the 32 bits instruction
   printf("Instruction: %x\n", instruction);
   // Decode the instruction
@@ -224,4 +258,9 @@ ver qué pasa si una instrucción tiene bits después del opcode de forma que se
 no pasaría nada porque no puede haber opcode de algo dentro de otro
 
 de las x instrucciones tengo que hacer 5 decodes ponele ya que varia el opcode entre 5 largos
+
+adds subs tienen dos registros y guarda en otro. puedo aprovechar para decodificar de la misma manera
+str o load uso read_mem 
+
+zero extend lo agrando a 64 bits. y el Zeros(12) agrega 12 ceros a la derecha por lo que shifteo 13 lugares a izquierda
 */
