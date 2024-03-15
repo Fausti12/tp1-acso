@@ -25,9 +25,12 @@ bool mask_opcode_2(uint32_t instruction, int len_opcode) {
     printf("0xfff: %d\n", 0xfff);
     printf("0x1f: %d\n", 0xF);
     printf("0x1f <<1: %d\n", 0xF<<28);   //reconoce con signo   si hago <<32 da 0
-    printf(" instruction & (0xF << 1): %d\n", (instruction & (0xFF << 24))>>24);
+    printf(" instruction & (0xF << 24) >> 24: %d\n", (instruction & (0xFF << 24))>>24);
     printf("0x91 %d\n", 0x91);
-    return ((instruction & (0xF)) ) ; } 
+    if (((instruction & (0xFF << 24))>>24) == 0x91){
+        printf("es 0x91\n");   // acá me dan iguales
+    }
+    return ((instruction & (0xFF << 24))>>24); } 
 
 
 
@@ -40,7 +43,14 @@ int get_opcode(uint32_t instruction){
 void decode(uint32_t instruction){
     printf("Instruction: %d\n", instruction);
     for (int i=5; i < 11; i++){
-        uint32_t mask_result = mask_opcode_2(0x00000091, i);
+
+
+        uint32_t mask_result = mask_opcode_2(0x91000000, i);
+        if (mask_result == 0x91){
+            printf("Opcode Opcode : %d\n", mask_result);  //acá no me dan iguales
+        }
+
+
         printf("Mask result: %d\n", mask_result);
         for (int j=0; j < sizeof(array_opcodes); j++){
             if (mask_result == array_opcodes[j]){
