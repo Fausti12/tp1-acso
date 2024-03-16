@@ -6,14 +6,28 @@
 #include <stdlib.h>
 #include <string.h>
 
+// la función add tiene de opcode 10010001 entonces hay que hacer una máscara
+// para obtener los 8 bits de opcode
+bool is_add(uint32_t opcode) { return ((opcode & (0xFF << 24)) >> 24) == 0x91; }
+
+
 uint32_t decode(uint32_t instruction) {
   // Extract the opcode from the instruction
   uint32_t opcode = 0;
+  if (is_add(instruction)) {
+    opcode = 0x91;
+  }
   return opcode;
 }
 
 void execute(uint32_t opcode, uint32_t instruction) {
   // Execute the instruction
+  if (opcode == 0x91) {
+    // Add
+    printf("Ejecuto Add\n");
+  } else{
+    printf("No se ejecuto nada\n");
+  }
   return;
 }
 
@@ -26,38 +40,26 @@ void process_instruction() {
    *             y otra para execute()
    *
    * */
-  /*
-    uint32_t instruction =
-        mem_read_32(CURRENT_STATE.PC); // Here we have the 32 bits instruction
 
-    // Decode the instruction
-    uint32_t opcode = decode(instruction);
+  
+  uint32_t instruction = mem_read_32(CURRENT_STATE.PC); // Here we have the 32 bits instruction
+  
 
-    // Execute the instruction
-    execute(opcode, instruction);
+  // Decode the instruction
+  uint32_t opcode = decode(instruction);
 
-    // Update the PC
-    NEXT_STATE.PC += 4;
-    */
+  // Execute the instruction
+  execute(opcode, instruction);
+
+  // Update the PC
+  NEXT_STATE.PC += 4;
+  
 
   return;
 }
 
-// la función add tiene de opcode 10010001 entonces hay que hacer una máscara
-// para obtener los 8 bits de opcode
-bool is_add(uint32_t opcode) { return ((opcode & (0xFF << 24)) >> 24) == 0x91; }
 
 int main() {
-  if (is_add(0b10010001000000000000000000000000)) {
-    printf("Es un add\n");
-  } else {
-    printf("No es un add\n");
-  }
-
-  if (is_add(0b10010001000000000000000000000000)) {
-    printf("Es un add\n");
-  } else {
-    printf("No es un add\n");
-  }
+  process_instruction();
   return 0;
 }
