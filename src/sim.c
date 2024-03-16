@@ -1,4 +1,5 @@
 #include "shell.h"
+#include "decoder.h"
 //#include "./instructions/adds_imm.h"
 #include <assert.h>
 #include <inttypes.h>
@@ -7,11 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-// execute functions * pongo funciones para cada instrucción
-
-
-//uint32_t array_opcodes[3] = [0xb1, 0xab, 0xf0];  // 10110001, 10101011, 11110000
-
 
 
 void adds_imm(uint32_t instruction){   //adds immediate
@@ -19,6 +15,7 @@ void adds_imm(uint32_t instruction){   //adds immediate
     uint32_t dest_register = instruction & 0x1F;
     uint32_t n_register = (instruction & (0x1F << 5)) >> 5;
     uint32_t shift = (instruction & (0x3 << 22)) >> 22;
+
     printf("d_reg = %x ", dest_register);
     printf("n_reg = %x ", n_register);
     printf("imm = %x ", immediate);
@@ -119,76 +116,13 @@ void subs_ext_register(uint32_t instruction){   //adds extended register
 
 
 
-// FUNCIONES PARA SABER SI UN OPCODE ES TAL INSTRUCCION O NO
-bool is_adds_imm(uint32_t instruction) { 
-    printf("El opcode imm es %x\n", (instruction & (0xFF << 24)) >> 24);
-    return (((instruction & (0xFF << 24)) >> 24) == 0xb1);   //10110001
-}
-bool is_adds_ext(uint32_t instruction) { 
-    printf("El opcode ext es %x\n", (instruction & (0xFF << 24)) >> 24);
-    return (((instruction & (0xFF << 24)) >> 24) == 0xab);    //10101011
-}
-
-bool is_subs_imm(uint32_t instruction) {   //VER
-    printf("El opcode subs imm es %x\n", (instruction & (0xFF << 24)) >> 24);
-    return (((instruction & (0xFF << 24)) >> 24) == 0xf1);   //11110000  (el ult es 0?)
-}
-
-bool is_subs_ext(uint32_t instruction) { 
-    printf("El opcode subs ext es %d\n", ((instruction & (0b11111111111 << 21)) >> 21) + 1);
-    return (((instruction& (0b11111111111 << 21)) >> 21) + 1 == 0b11101011001);    //11101011001
-}
-
-
-uint32_t is_opcode_length_8(uint32_t instruction, uint32_t* array_opcodes) {
-  uint32_t result =  (instruction & (0xFF << 24)) >> 24;
-  for (int i = 0; i < 3; i++) {    //i llega hasta la cantidad de opcodes de ese largo
-    //printf("El valor array es %x\n", array_opcodes[i]);
-    if (result == array_opcodes[i]) {
-      return i;
-    }
-  }
-  return -1;
-
-}
-
-uint32_t is_opcode_length_11(uint32_t instruction, uint32_t* array_opcodes) {
-  uint32_t result =  (instruction & (0b11111111111 << 21)) >> 21;
-  for (int i = 3; i < 5; i++) {    //i llega hasta la cantidad de opcodes de ese largo
-    //printf("El valor array es %x\n", array_opcodes[i]);
-    if (result == array_opcodes[i]) {
-      return i;
-    }
-  }
-  return -1;
-
-}
-
-
-
-// SE RETORNA EL OPCODE
-uint32_t decode(uint32_t instruction) {
-  // Extract the opcode from the instruction
-  uint32_t array_opcodes[5] = {0xb1, 0xab, 0xf1, 0b11101011001, 0b11010100010};
-  // índice 0-> adds imm, 1-> adds ext, 2-> subs imm, 3-> subs ext, 4-> hlt
-
-  uint32_t opcode = 0;
-  int index = is_opcode_length_8(instruction, array_opcodes);
-  printf("El index es %d\n", index);
-  if (index != -1) {opcode = array_opcodes[index];}
-  int index2 = is_opcode_length_11(instruction, array_opcodes);
-  printf("El index2 es %d\n", index2);
-  if (index2 != -1) {opcode = array_opcodes[index2];}
-  else if (is_subs_ext(instruction)) {
-    printf("Entra al subs ext\n");
-    opcode = 0b11101011001;
-  }
-  return opcode;
-}
-
 // VIENDO EL OPCODE RETORNADO DECIDO QUE ACCION TOMAR
 void execute(uint32_t opcode, uint32_t instruction) {
   // Execute the instruction
+
+  // Extraxt the opcode from the instruction
+  opcode = decode(instruction);
+
   if (opcode == 0xb1) {
     printf("Entra al imm\n");
     // Adds immediate
@@ -218,6 +152,34 @@ void execute(uint32_t opcode, uint32_t instruction) {
     printf("Halt\n");
     RUN_BIT= 0;
   }
+
+  else if (opcode == 0b01010100){  //B.CONDITIONS
+    if (decode_b_cond(instruction) == 0){
+      printf("B.eq\n");
+      //B.eq();
+    }
+    else if (decode_b_cond(instruction) == 1){
+      printf("B.ne\n");
+      //B.ne();
+    }
+    else if (decode_b_cond(instruction) == 0b1100){
+      printf("B.gt\n");
+      //B.gt();
+    }
+    else if (decode_b_cond(instruction) == 0b1011){
+      printf("B.lt\n");
+      //B.lt();
+    }
+    else if (decode_b_cond(instruction) == 0b1010){
+      printf("B.ge\n");
+      //B.ge();
+    }
+    else if (decode_b_cond(instruction) == 0b1101){
+      printf("B.le\n");
+      //B.le();
+    }
+  }
+  
   else{
     printf("No se ejecuto nada\n");
   }
