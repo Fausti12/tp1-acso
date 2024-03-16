@@ -121,7 +121,7 @@ void execute(uint32_t opcode, uint32_t instruction) {
   // Execute the instruction
 
   // Extraxt the opcode from the instruction
-  opcode = decode(instruction);
+  //opcode = decode(instruction);
 
   if (opcode == 0xb1) {
     printf("Entra al imm\n");

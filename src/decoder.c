@@ -56,33 +56,23 @@ uint32_t decode(uint32_t instruction) {
 
   // Verify if it is an 6 bit opcode
   uint32_t opcode = (instruction & (0b111111 << 26)) >> 26;
-  if (opcode == array_opcodes_6) {
-    return opcode;
-  }
+  if (opcode == array_opcodes_6) {return opcode;}
 
   // Verify if it is an 8 bit opcode
   uint32_t opcode = is_opcode_length_8(instruction, array_opcodes_8);
-  if (opcode != -1) {
-    return opcode;
-  }
+  if (opcode != -1) {return opcode;}
 
   // Verify if it is an 9 bit opcode
   opcode = is_opcode_length_9(instruction, array_opcodes_9);
-  if (opcode != -1) {
-    return opcode;
-  }
+  if (opcode != -1) { return opcode; }
 
   // Verify if it is an 11 bit opcode
   opcode = is_opcode_length_11(instruction, array_opcodes_11);
-  if (opcode != -1) {
-    return opcode;
-  }
+  if (opcode != -1) {return opcode;}
 
   // Verify if it is an 22 bit opcode
   opcode = (instruction & (0b1111111111111111111111 << 10)) >> 10;
-  if (opcode == array_opcodes_22) {
-    return opcode;
-  }
+  if (opcode == array_opcodes_22) {return opcode;}
 
   return opcode;
 }
