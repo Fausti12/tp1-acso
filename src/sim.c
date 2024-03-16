@@ -132,13 +132,12 @@ bool is_adds_ext(uint32_t opcode) {
 
 bool is_subs_imm(uint32_t instruction) {   //VER
     printf("El opcode subs imm es %x\n", (instruction & (0xFF << 24)) >> 24);
-    printf("first 8 inst = %x\n", (instruction << 24));
-    return (((instruction & (0xFF << 24)) >> 24) == 0xf0);   //11110000  (el ult es 0?)
+    return (((instruction & (0xFF << 24)) >> 24) == 0xf1);   //11110000  (el ult es 0?)
 }
 
 bool is_subs_ext(uint32_t opcode) { 
-    printf("El opcode subs ext es %x\n", (opcode & (0xFFF << 22)) >> 22);
-    return (((opcode & (0xFFF << 22)) >> 22) == 0b11101011001);    //11101011001
+    printf("El opcode subs ext es %d\n", ((opcode & (0b11111111111 << 21)) >> 21) + 1);
+    return (((opcode & (0b11111111111 << 21)) >> 21) + 1 == 0b11101011001);    //11101011001
 }
 
 // SE RETORNA EL OPCODE
