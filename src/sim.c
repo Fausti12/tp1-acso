@@ -24,13 +24,19 @@ void adds_imm(uint32_t instruction){   //adds immediate
     printf("imm = %x ", immediate);
     printf("shift = %x\n", shift);
 
+
+    uint64_t extend_immediate = 0;
     if (shift == 0b01){
-        immediate = immediate << 12;
-
+        extend_immediate = immediate;
+        extend_immediate = extend_immediate << 12;
     }
-    
 
-    NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] + immediate;
+    else if (shift == 0b00){
+      printf("shift = 0\n");
+      extend_immediate = immediate;   //ver si está bien
+    }
+
+    NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] + extend_immediate;
 
     if (NEXT_STATE.REGS[dest_register] < 0){
         NEXT_STATE.FLAG_N = 1;
@@ -67,7 +73,7 @@ void adds_ext_register(uint32_t instruction){   //adds extended register
 
 
 
-
+// se usa también para cmp imm
 void subs_imm(uint32_t instruction){   //adds immediate
     uint32_t immediate = (instruction & (0xFFF << 10)) >> 10;
     uint32_t dest_register = instruction & 0x1F;
@@ -83,8 +89,8 @@ void subs_imm(uint32_t instruction){   //adds immediate
 
     }
     
-
-    NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] - immediate;
+    // para cmp
+    if (dest_register != 0b11111) {NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] - immediate;}
 
     if (NEXT_STATE.REGS[dest_register] < 0){
         NEXT_STATE.FLAG_N = 1;
@@ -107,8 +113,8 @@ void subs_ext_register(uint32_t instruction){   //adds extended register
     printf("option = %d ", option);
     printf("m_reg = %d\n", m_register);
 
-  
-    NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] - NEXT_STATE.REGS[m_register];
+    // para cmp
+    if (dest_register != 0b11111) {NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] - NEXT_STATE.REGS[m_register];}
 
     if (NEXT_STATE.REGS[dest_register] < 0){
         NEXT_STATE.FLAG_N = 1;
@@ -137,7 +143,7 @@ bool is_subs_imm(uint32_t instruction) {   //VER
 bool is_subs_ext(uint32_t instruction) { 
     printf("El opcode subs ext es %d\n", ((instruction & (0b11111111111 << 21)) >> 21) + 1);
     return (((instruction& (0b11111111111 << 21)) >> 21) + 1 == 0b11101011001);    //11101011001
-}
+} // sin el + 1 no anda
 
 
 uint32_t is_opcode_length_8(uint32_t instruction, uint32_t* array_opcodes) {
@@ -170,12 +176,13 @@ uint32_t is_opcode_length_11(uint32_t instruction, uint32_t* array_opcodes) {
 uint32_t decode(uint32_t instruction) {
   // Extract the opcode from the instruction
   uint32_t array_opcodes[5] = {0xb1, 0xab, 0xf1, 0b11101011001, 0b11010100010};
-  // índice 0-> adds imm, 1-> adds ext, 2-> subs imm, 3-> subs ext, 4-> hlt
+  // índice 0-> adds imm, 1-> adds ext, 2-> subs imm, 3-> subs ext (ver pq al final va 1), 4-> hlt
+
 
   uint32_t opcode = 0;
   int index = is_opcode_length_8(instruction, array_opcodes);
   printf("El index es %d\n", index);
-  if (index != -1) {opcode = array_opcodes[index];}
+  if (index != -1) {return array_opcodes[index];}
   int index2 = is_opcode_length_11(instruction, array_opcodes);
   printf("El index2 es %d\n", index2);
   if (index2 != -1) {opcode = array_opcodes[index2];}
