@@ -285,7 +285,7 @@ bool is_subs_ext(uint32_t instruction) {
 uint32_t decode(uint32_t instruction) {
   // Extract the opcode from the instruction
   uint32_t array_opcodes_6 = 0b000101; // B  
-  uint32_t array_opcodes_8[8] = {0xb1, 0xab, 0xf0, 0b11110001, 0b11101010, 0b1001010, 0b10101010, 0b01010100, };  
+  //uint32_t array_opcodes_8[8] = {0xb1, 0xab, 0xf1, 0xea, 0xaa, 0b11101010, 0b1001010, 0xaa, 0b01010100, };  
 // 10110001, 10101011, 11110000    // adds imm, adds ext, subs imm, cmp imm, ands_shit, eor_shift, orr_shift, b.cond,
   uint32_t array_opcodes_9[3] = {0b110100110, 0b110100110, 0b110100101}; // lsl_imm, lsr_imm, movz
   uint32_t array_opcodes_11[9] = {0b11101011001, 0b11010100010, 0b11101011001, 0b11111000000, 0b00111000000, 0b01111000000, 0b11111000010, 0b01111000010, 0b00111000010};  
@@ -295,6 +295,11 @@ uint32_t decode(uint32_t instruction) {
   uint8_t array_b_cond[6] = {0b0, 0b1, 0b1100, 0b1011, 0b1010, 0b1101};   
 //B.:eq, ne, gt, lt, ge, le
 
+
+
+  uint32_t array_opcodes_8[8] = {0xb1, 0xab, 0xf1, 0xea ,0xca, 0xaa  ,0b11101011001, 0b11010100010};
+  // índice 0-> adds imm, 1-> adds ext, 2-> subs imm, 3-> ands shifted, 4-> eor shifted,
+  // 5-> orr shifted, 6-> subs ext (ver pq al final va 1), 7-> hlt
 
 
   // Verify if it is an 6 bit opcode
@@ -313,6 +318,9 @@ uint32_t decode(uint32_t instruction) {
   // Verify if it is an 11 bit opcode
   opcode = is_opcode_length_11(instruction, array_opcodes_11);
   if (opcode != -1) {return opcode;}
+
+  opcode = is_subs_ext(instruction);
+  if (opcode == 1) {return opcode;}
 
   // Verify if it is an 22 bit opcode
   opcode = (instruction & (0b1111111111111111111111 << 10)) >> 10;
@@ -340,13 +348,14 @@ void execute(uint32_t opcode, uint32_t instruction) {
   Node_t array_opcodes[8] = {
     {0xb1, adds_imm},
     {0xab, adds_ext_register},
-    {0xf0, subs_imm},
-    {0b11110001, subs_ext_register},
-    {0b11101010, ands_shifted_register},
-    {0b1001010, eor_shifted_register},
-    {0b10101010, orr_shifted_register},
+    {0xf1, subs_imm},
+    {0b11101011001, subs_ext_register},
+    {0xea, ands_shifted_register},
+    {0xca, eor_shifted_register},
+    {0xaa, orr_shifted_register},
     {0b01010100, 0}
   };
+
   for (int i = 0; i < 8; i++) {
     if (opcode == array_opcodes[i].opcode) {
       printf("Entra al if\n");
