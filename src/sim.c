@@ -83,7 +83,8 @@ void subs_imm(uint32_t instruction){   //adds immediate
     printf("n_reg = %d ", n_register);
     printf("imm = %d ", immediate);
     printf("shift = %d\n", shift);
-
+ 
+    //solo se hace shift = 01
     if (shift == 0b01){
         immediate = immediate << 12;
 
@@ -125,6 +126,37 @@ void subs_ext_register(uint32_t instruction){   //adds extended register
 
 
 
+void ands_ext_register(uint32_t instruction){   //adds immediate
+    uint32_t dest_register = instruction & 0x1F;
+    uint32_t n_register = (instruction & (0x1F << 5)) >> 5;
+    uint32_t immediate = (instruction & (0x7F << 10)) >> 10;    //te dice cuánto shiftear en registro M
+    uint32_t m_register = (instruction & (0x1F << 16)) >> 16;
+    uint32_t shift = (instruction & (0x3 << 22)) >> 22;     //te dice qué tipo de shift (Rm)
+    printf("d_reg = %d ", dest_register);
+    printf("n_reg = %d ", n_register);
+    printf("imm = %d ", immediate);
+    printf("shift = %d\n", shift);
+    printf("m_reg = %d\n", m_register);
+
+
+    //shift izquiera
+    if (shift == 0b00){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] << immediate);}
+    // shift derecha
+    else if (shift == 0b01){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] >> immediate);}
+    //else if (shift == 0b10){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] << NEXT_STATE.REGS[immediate]);}
+    //else if (shift == 0b11){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] >> NEXT_STATE.REGS[immediate]);}
+
+    if (NEXT_STATE.REGS[dest_register] < 0){
+        NEXT_STATE.FLAG_N = 1;
+    } else if (NEXT_STATE.REGS[dest_register] == 0){
+        NEXT_STATE.FLAG_Z = 1;
+ 
+
+}
+
+}
+
+
 // FUNCIONES PARA SABER SI UN OPCODE ES TAL INSTRUCCION O NO
 bool is_adds_imm(uint32_t instruction) { 
     printf("El opcode imm es %x\n", (instruction & (0xFF << 24)) >> 24);
@@ -148,7 +180,7 @@ bool is_subs_ext(uint32_t instruction) {
 
 uint32_t is_opcode_length_8(uint32_t instruction, uint32_t* array_opcodes) {
   uint32_t result =  (instruction & (0xFF << 24)) >> 24;
-  for (int i = 0; i < 3; i++) {    //i llega hasta la cantidad de opcodes de ese largo
+  for (int i = 0; i < 4; i++) {    //i llega hasta la cantidad de opcodes de ese largo
     //printf("El valor array es %x\n", array_opcodes[i]);
     if (result == array_opcodes[i]) {
       return i;
@@ -175,8 +207,8 @@ uint32_t is_opcode_length_11(uint32_t instruction, uint32_t* array_opcodes) {
 // SE RETORNA EL OPCODE
 uint32_t decode(uint32_t instruction) {
   // Extract the opcode from the instruction
-  uint32_t array_opcodes[5] = {0xb1, 0xab, 0xf1, 0b11101011001, 0b11010100010};
-  // índice 0-> adds imm, 1-> adds ext, 2-> subs imm, 3-> subs ext (ver pq al final va 1), 4-> hlt
+  uint32_t array_opcodes[6] = {0xb1, 0xab, 0xf1, 0xea ,0b11101011001, 0b11010100010};
+  // índice 0-> adds imm, 1-> adds ext, 2-> subs imm, 3-> ands ext,4-> subs ext (ver pq al final va 1), 5-> hlt
 
 
   uint32_t opcode = 0;
@@ -224,6 +256,10 @@ void execute(uint32_t opcode, uint32_t instruction) {
   else if (opcode == 0b11010100010){
     printf("Halt\n");
     RUN_BIT= 0;
+  }
+  else if (opcode == 0xea){
+    printf("Tengo que hacer ands ext");
+    ands_ext_register(instruction);
   }
   else{
     printf("No se ejecuto nada\n");
