@@ -1,3 +1,4 @@
+
 #include "shell.h"
 //#include "./instructions/adds_imm.h"
 #include <assert.h>
@@ -120,13 +121,13 @@ void subs_ext_register(uint32_t instruction){   //adds extended register
 
 
 // FUNCIONES PARA SABER SI UN OPCODE ES TAL INSTRUCCION O NO
-bool is_adds_imm(uint32_t instruction) { 
-    printf("El opcode imm es %x\n", (instruction & (0xFF << 24)) >> 24);
-    return (((instruction & (0xFF << 24)) >> 24) == 0xb1);   //10110001
+bool is_adds_imm(uint32_t opcode) { 
+    printf("El opcode imm es %x\n", (opcode & (0xFF << 24)) >> 24);
+    return (((opcode & (0xFF << 24)) >> 24) == 0xb1);   //10110001
 }
-bool is_adds_ext(uint32_t instruction) { 
-    printf("El opcode ext es %x\n", (instruction & (0xFF << 24)) >> 24);
-    return (((instruction & (0xFF << 24)) >> 24) == 0xab);    //10101011
+bool is_adds_ext(uint32_t opcode) { 
+    printf("El opcode ext es %x\n", (opcode & (0xFF << 24)) >> 24);
+    return (((opcode & (0xFF << 24)) >> 24) == 0xab);    //10101011
 }
 
 bool is_subs_imm(uint32_t instruction) {   //VER
@@ -134,35 +135,26 @@ bool is_subs_imm(uint32_t instruction) {   //VER
     return (((instruction & (0xFF << 24)) >> 24) == 0xf1);   //11110000  (el ult es 0?)
 }
 
-bool is_subs_ext(uint32_t instruction) { 
-    printf("El opcode subs ext es %d\n", ((instruction & (0b11111111111 << 21)) >> 21) + 1);
-    return (((instruction& (0b11111111111 << 21)) >> 21) + 1 == 0b11101011001);    //11101011001
+bool is_subs_ext(uint32_t opcode) { 
+    printf("El opcode subs ext es %d\n", ((opcode & (0b11111111111 << 21)) >> 21) + 1);
+    return (((opcode & (0b11111111111 << 21)) >> 21) + 1 == 0b11101011001);    //11101011001
 }
-
-
-uint32_t is_opcode_length_8(uint32_t instruction, uint32_t* array_opcodes) {
-  uint32_t result =  (instruction & (0xFF << 24)) >> 24;
-  for (int i = 0; i < 3; i++) {    //i llega hasta la cantidad de opcodes de ese largo
-    printf("El valor array es %x\n", array_opcodes[i]);
-    if (result == array_opcodes[i]) {
-      return i;
-    }
-  }
-  return -1;
-
-}
-
-
 
 // SE RETORNA EL OPCODE
 uint32_t decode(uint32_t instruction) {
   // Extract the opcode from the instruction
-  uint32_t array_opcodes[4] = {0xb1, 0xab, 0xf1, 0b11101011001};
   uint32_t opcode = 0;
-  int index = is_opcode_length_8(instruction, array_opcodes);
-  printf("El index es %d\n", index);
-  if (index != -1) {
-    opcode = array_opcodes[index];
+  if (is_adds_imm(instruction)) {
+    printf("Entra al adds imm\n");
+    opcode = 0xb1;
+  } 
+  else if (is_adds_ext(instruction)) {
+    printf("Entra al adds ext\n");
+    opcode = 0xab;
+  }
+  else if (is_subs_imm(instruction)) {
+    printf("Entra al subs imm\n");
+    opcode = 0xf0;
   }
   else if (is_subs_ext(instruction)) {
     printf("Entra al subs ext\n");
@@ -188,7 +180,7 @@ void execute(uint32_t opcode, uint32_t instruction) {
 
   } 
   
-  else if (opcode == 0xf1){
+  else if (opcode == 0xf0){
     // Substracts immediate
     printf("Tengo que restar subs imm");
     subs_imm(instruction);
@@ -230,3 +222,44 @@ void process_instruction() {
   return;
 }
 
+
+
+
+/*
+cd inputs
+cat *.s  -> imprime cualquier archivo que tiene .s
+cat sturb.s -> imprime el archivo sturb.s
+./asm2hex sturb.s -> lo pasa a hexadecimal
+cat sturb.x
+el .x es lo que usamos para simular
+armar otro test de subs sin immediate
+Hacer variantes de 64 bits-> sf=1 en varios casos
+pag 531
+tenemos que hacer operaciones del sudo code en c.
+nos va llegar el valor de un registro o immediate en hexa
+int a = 0b000000001100 -> 12
+int b = 0xc; printf("%d", b); -> 12
+
+me llega instrucción en binario
+Pc es la dirección de la instrucción. como las instrucciones están guardadas en memoria, uso la función mem_read 
+
+
+./asm2hex adds.s
+./ref_sim inputs/adds.x
+run 1  -> ejecuta una instrucción
+los corchetes indican memoria
+lsl: shift left. lsl x1, x1,16 -> x1 = x1 << 16
+
+
+input 10 -1  le resto 1 al registro 10
+
+ver qué pasa si una instrucción tiene bits después del opcode de forma que se pueda confundir con otro opcode
+no pasaría nada porque no puede haber opcode de algo dentro de otro
+
+de las x instrucciones tengo que hacer 5 decodes ponele ya que varia el opcode entre 5 largos
+
+adds subs tienen dos registros y guarda en otro. puedo aprovechar para decodificar de la misma manera
+str o load uso read_mem 
+
+zero extend lo agrando a 64 bits. y el Zeros(12) agrega 12 ceros a la derecha por lo que shifteo 13 lugares a izquierda
+*/
