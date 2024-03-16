@@ -319,8 +319,7 @@ uint32_t decode(uint32_t instruction) {
   opcode = is_opcode_length_11(instruction, array_opcodes_11);
   if (opcode != -1) {return opcode;}
 
-  opcode = is_subs_ext(instruction);
-  if (opcode == 1) {return opcode;}
+  if (is_subs_ext(instruction)) {return 0b11101011001;}
 
   // Verify if it is an 22 bit opcode
   opcode = (instruction & (0b1111111111111111111111 << 10)) >> 10;
@@ -363,50 +362,8 @@ void execute(uint32_t opcode, uint32_t instruction) {
       return;
     }
   }  
-  // Execute the instruction
-  if (opcode == 0xb1) {
-    printf("Entra al imm\n");
-    // Adds immediate
-    adds_imm(instruction);
-  } 
-  else if (opcode == 0xab){
-    // Adds extended register
-    //adds_ext(instruction);
-    printf("Tengo que sumar adds ext");
-    adds_ext_register(instruction);
-    
-
-  } 
   
-  else if (opcode == 0xf1){
-    // Substracts immediate
-    printf("Tengo que restar subs imm");
-    subs_imm(instruction);
-    
-    }
-  else if (opcode == 0b11101011001){
-    // Substracts extended register
-    printf("Tengo que restar subs ext");
-    subs_ext_register(instruction);
-  }
-  else if (opcode == 0b11010100010){
-    printf("Halt\n");
-    RUN_BIT= 0;
-  }
-  else if (opcode == 0xea){
-    printf("Tengo que hacer ands ext");
-    ands_shifted_register(instruction);
-  }
-  else if (opcode == 0xca){
-    printf("Tengo que hacer eor ext");
-    eor_shifted_register(instruction);
-  }
-  else if (opcode == 0xaa){
-    printf("Tengo que hacer orr ext");
-    orr_shifted_register(instruction);
-  }
-
-  else if (opcode == 0b01010100){  //B.CONDITIONS
+  if (opcode == 0b01010100){  //B.CONDITIONS
     if (decode_b_cond(instruction) == 0){
       printf("B.eq\n");
       //B.eq();
