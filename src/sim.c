@@ -12,7 +12,10 @@
 //uint32_t array_opcodes[3] = [0xb1, 0xab, 0xf0];  // 10110001, 10101011, 11110000
 
 
-
+typedef struct Node {
+  uint32_t opcode;
+  void (*function)(uint32_t);
+} Node_t;
 
 uint32_t is_opcode_length_8(uint32_t instruction, uint32_t* array_opcodes) {
   printf("instruction = %x\n", instruction);
@@ -23,7 +26,7 @@ uint32_t is_opcode_length_8(uint32_t instruction, uint32_t* array_opcodes) {
     //printf("El valor array es %x\n", array_opcodes[i]);
     if (result == array_opcodes[i]) {
       printf("El valor de i es %d\n", i);
-      return i;
+      return array_opcodes[i];
     }
   }
   return -1;
@@ -35,7 +38,7 @@ uint32_t is_opcode_length_9(uint32_t instruction, uint32_t* array_opcodes) {
   for (int i = 0; i < 3; i++) {    //i llega hasta la cantidad de opcodes de ese largo
     //printf("El valor array es %x\n", array_opcodes[i]);
     if (result == array_opcodes[i]) {
-      return i;
+      return array_opcodes[i];
     }
   }
   return -1;
@@ -47,7 +50,7 @@ uint32_t is_opcode_length_11(uint32_t instruction, uint32_t* array_opcodes) {
   for (int i = 0; i < 9; i++) {    //i llega hasta la cantidad de opcodes de ese largo
     //printf("El valor array es %x\n", array_opcodes[i]);
     if (result == array_opcodes[i]) {
-      return i;
+      return array_opcodes[i];
     }
   }
   return -1;
@@ -334,6 +337,23 @@ uint8_t decode_b_cond(uint32_t instruction) {
 
 // VIENDO EL OPCODE RETORNADO DECIDO QUE ACCION TOMAR
 void execute(uint32_t opcode, uint32_t instruction) {
+  Node_t array_opcodes[8] = {
+    {0xb1, adds_imm},
+    {0xab, adds_ext_register},
+    {0xf0, subs_imm},
+    {0b11110001, subs_ext_register},
+    {0b11101010, ands_shifted_register},
+    {0b1001010, eor_shifted_register},
+    {0b10101010, orr_shifted_register},
+    {0b01010100, 0}
+  };
+  for (int i = 0; i < 8; i++) {
+    if (opcode == array_opcodes[i].opcode) {
+      printf("Entra al if\n");
+      array_opcodes[i].function(instruction);
+      return;
+    }
+  }  
   // Execute the instruction
   if (opcode == 0xb1) {
     printf("Entra al imm\n");
