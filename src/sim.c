@@ -143,7 +143,19 @@ bool is_subs_ext(uint32_t instruction) {
 uint32_t is_opcode_length_8(uint32_t instruction, uint32_t* array_opcodes) {
   uint32_t result =  (instruction & (0xFF << 24)) >> 24;
   for (int i = 0; i < 3; i++) {    //i llega hasta la cantidad de opcodes de ese largo
-    printf("El valor array es %x\n", array_opcodes[i]);
+    //printf("El valor array es %x\n", array_opcodes[i]);
+    if (result == array_opcodes[i]) {
+      return i;
+    }
+  }
+  return -1;
+
+}
+
+uint32_t is_opcode_length_11(uint32_t instruction, uint32_t* array_opcodes) {
+  uint32_t result =  (instruction & (0b11111111111 << 21)) >> 21;
+  for (int i = 3; i < 5; i++) {    //i llega hasta la cantidad de opcodes de ese largo
+    //printf("El valor array es %x\n", array_opcodes[i]);
     if (result == array_opcodes[i]) {
       return i;
     }
@@ -157,13 +169,16 @@ uint32_t is_opcode_length_8(uint32_t instruction, uint32_t* array_opcodes) {
 // SE RETORNA EL OPCODE
 uint32_t decode(uint32_t instruction) {
   // Extract the opcode from the instruction
-  uint32_t array_opcodes[4] = {0xb1, 0xab, 0xf1, 0b11101011001};
+  uint32_t array_opcodes[5] = {0xb1, 0xab, 0xf1, 0b11101011001, 0b11010100010};
+  // índice 0-> adds imm, 1-> adds ext, 2-> subs imm, 3-> subs ext, 4-> hlt
+
   uint32_t opcode = 0;
   int index = is_opcode_length_8(instruction, array_opcodes);
   printf("El index es %d\n", index);
-  if (index != -1) {
-    opcode = array_opcodes[index];
-  }
+  if (index != -1) {opcode = array_opcodes[index];}
+  int index2 = is_opcode_length_11(instruction, array_opcodes);
+  printf("El index2 es %d\n", index2);
+  if (index2 != -1) {opcode = array_opcodes[index2];}
   else if (is_subs_ext(instruction)) {
     printf("Entra al subs ext\n");
     opcode = 0b11101011001;
@@ -198,6 +213,10 @@ void execute(uint32_t opcode, uint32_t instruction) {
     // Substracts extended register
     printf("Tengo que restar subs ext");
     subs_ext_register(instruction);
+  }
+  else if (opcode == 0b11010100010){
+    printf("Halt\n");
+    RUN_BIT= 0;
   }
   else{
     printf("No se ejecuto nada\n");
