@@ -324,7 +324,7 @@ void bcond(uint32_t instruction){
 void lsl_lsr_imm(uint32_t instruction){   
     uint32_t dest_register = instruction & 0b11111;
     uint32_t n_register = (instruction & (0b11111 << 5)) >> 5;
-    uint32_t immediate = (instruction & (0b111111 << 16)) >> 16;
+    uint32_t immediate = (instruction & (0b11111 << 16)) >> 16;
 
     uint32_t mask = 0b111111 << 10;
 
@@ -395,9 +395,9 @@ void ldur(uint32_t instruction){
     if (type == 0b11){          // LDUR
         NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate);
     } else if (type == 0b01){   // LDURH
-        NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate) & 0xFFFF;
+        NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate) & (0xFFFF << 16);
     } else {                    // LDURB
-        NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate) & 0xFF;
+        NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate) & (0xFF << 24);
     }
 
 
@@ -541,6 +541,7 @@ bool execute(uint32_t opcode, uint32_t instruction) {
       printf("Entra al if\n");
       printf("OPcode es %x\n", opcode);
       array_opcodes[i].function(instruction);
+      return;
       //if (opcode == 0x54){ return false;}     // si es b.cond no cambia el pc en función process_instruction
       //else {return true;}   //estaría mal pq si era bcond pero no cumple condición, no hago salto
     }
