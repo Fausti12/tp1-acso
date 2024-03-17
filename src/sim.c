@@ -324,7 +324,7 @@ void bcond(uint32_t instruction){
 void lsl_lsr_imm(uint32_t instruction){   
     uint32_t dest_register = instruction & 0b11111;
     uint32_t n_register = (instruction & (0b11111 << 5)) >> 5;
-    uint32_t immediate = (instruction & (0b11111 << 16)) >> 16;
+    uint32_t immediate = (instruction & (0b111111 << 16)) >> 16;
 
     uint32_t mask = 0b111111 << 10;
 
@@ -334,10 +334,10 @@ void lsl_lsr_imm(uint32_t instruction){
 
     // Si la máscara da 0b111111 es LSR, sino es LSL
     if (((instruction & mask) >> 10) == 0b111111){
-        NEXT_STATE.REGS[dest_register] = CURRENT_STATE.REGS[n_register] >> immediate;
+        NEXT_STATE.REGS[dest_register] = CURRENT_STATE.REGS[n_register] >> (64 - immediate);
     } else {
         printf("LSL %d\n", CURRENT_STATE.REGS[n_register]);
-        NEXT_STATE.REGS[dest_register] = CURRENT_STATE.REGS[n_register] << immediate;
+        NEXT_STATE.REGS[dest_register] = CURRENT_STATE.REGS[n_register] << (64 - immediate);
     }
 
     
@@ -367,9 +367,11 @@ void stur_b_h(uint32_t instruction){
     if (type == 0b11){          // STUR
         mem_write_32(NEXT_STATE.REGS[n_register] + immediate, NEXT_STATE.REGS[t_register]);
     } else if (type == 0b01){   // STURH
-        mem_write_32(NEXT_STATE.REGS[n_register] + immediate, NEXT_STATE.REGS[t_register] & (0xFFFF << 16));
+        //mem_write_32(NEXT_STATE.REGS[n_register] + immediate, NEXT_STATE.REGS[t_register] & (0xFFFF << 16));
+        mem_write_32(NEXT_STATE.REGS[n_register] + immediate, NEXT_STATE.REGS[t_register] & (0xFFFF ));
     } else {                    // STURB
-        mem_write_32(NEXT_STATE.REGS[n_register] + immediate, NEXT_STATE.REGS[t_register] & (0xFF << 24));
+        //mem_write_32(NEXT_STATE.REGS[n_register] + immediate, NEXT_STATE.REGS[t_register] & (0xFF << 24));
+        mem_write_32(NEXT_STATE.REGS[n_register] + immediate, NEXT_STATE.REGS[t_register] & (0xFF ));
     }
 
     // Y también supongo que no hay que actualizar los flags
@@ -395,9 +397,11 @@ void ldur(uint32_t instruction){
     if (type == 0b11){          // LDUR
         NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate);
     } else if (type == 0b01){   // LDURH
-        NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate) & (0xFFFF << 16);
+        //NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate) & (0xFFFF << 16);
+        NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate) & (0xFFFF );
     } else {                    // LDURB
-        NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate) & (0xFF << 24);
+        //NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate) & (0xFF << 24);
+        NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate) & (0xFF );
     }
 
 
