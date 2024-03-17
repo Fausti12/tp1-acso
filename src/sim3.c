@@ -320,38 +320,26 @@ void bcond(uint32_t instruction){
   }
 }
 
-// LSL immediate /// CORREGIR OPCODE
-void lsl_imm(uint32_t instruction){   
+// LSL immediate
+void lsl_lsr_imm(uint32_t instruction){   
     uint32_t dest_register = instruction & 0b11111;
     uint32_t n_register = (instruction & (0b11111 << 5)) >> 5;
     uint32_t immediate = (instruction & (0b111111 << 16)) >> 16;
+
+    uint32_t mask = 0b111111 << 10;
 
     printf("d_reg = %d ", dest_register);
     printf("n_reg = %d ", n_register);
     printf("imm = %d\n", immediate);
 
-    NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] << immediate;
-
-    if (NEXT_STATE.REGS[dest_register] < 0){
-        NEXT_STATE.FLAG_N = 1;
-    } else if (NEXT_STATE.REGS[dest_register] == 0){
-        NEXT_STATE.FLAG_Z = 1;
+    // Si la máscara da 0b111111 es LSR, sino es LSL
+    if (((instruction & mask) >> 10) == 0b111111){
+        NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] >> immediate;
+    } else {
+        NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] << immediate;
     }
-}
 
-
-// LSR immediate
-void lsr_imm(uint32_t instruction){   
-    uint32_t dest_register = instruction & 0b11111;
-    uint32_t n_register = (instruction & (0b11111 << 5)) >> 5;
-    uint32_t immediate = (instruction & (0b111111 << 16)) >> 16;
-
-    printf("d_reg = %d ", dest_register);
-    printf("n_reg = %d ", n_register);
-    printf("imm = %d\n", immediate);
-
-    NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] >> immediate;
-
+    
     if (NEXT_STATE.REGS[dest_register] < 0){
         NEXT_STATE.FLAG_N = 1;
     } else if (NEXT_STATE.REGS[dest_register] == 0){
@@ -361,100 +349,62 @@ void lsr_imm(uint32_t instruction){
 
 
 // STUR --> stur X1, [X2, #0x10] (descripción: M[X2 + 0x10] = X1)
-void stur(uint32_t instruction){   
+// QUEDA EN DUDA SI CON LOS PRIMEROS BITS SE REFIERE A LOS MÁS SIGNIFICATIVOS O MENOS SIGNIFICATIVOS
+void stur_b_h(uint32_t instruction){   
     uint32_t t_register = instruction & 0b11111;
     uint32_t n_register = (instruction & (0b11111 << 5)) >> 5;
-    uint32_t immediate = (instruction & (0b111111111 << 12)) >> 12;
+    int64_t immediate = (instruction & (0b111111111 << 12)) >> 12;
 
     printf("d_reg = %d ", t_register);
     printf("n_reg = %d ", n_register);
     printf("imm = %d\n", immediate);
 
-    mem_write_32(NEXT_STATE.REGS[n_register] + immediate, NEXT_STATE.REGS[t_register]);
+    // Si es 11 --> stur, si es 01 --> sturh, si es 00 --> sturb
+    uint32_t mask = 0b11 << 30;
+    uint32_t type = (instruction & mask) >> 30;
+
+    if (type == 0b11){          // STUR
+        mem_write_32(NEXT_STATE.REGS[n_register] + immediate, NEXT_STATE.REGS[t_register]);
+    } else if (type == 0b01){   // STURH
+        mem_write_32(NEXT_STATE.REGS[n_register] + immediate, NEXT_STATE.REGS[t_register] & 0xFFFF);
+    } else {                    // STURB
+        mem_write_32(NEXT_STATE.REGS[n_register] + immediate, NEXT_STATE.REGS[t_register] & 0xFF);
+    }
 
     // Y también supongo que no hay que actualizar los flags
 
 }
-
-// STURB --> sturb X1, [X2, #0x10] (descripción: M[X2 + 0x10](7:0) = X1(7:0))
-void sturb(uint32_t instruction){   
-    uint32_t t_register = instruction & 0b11111;
-    uint32_t n_register = (instruction & (0b11111 << 5)) >> 5;
-    uint32_t immediate = (instruction & (0b111111111 << 12)) >> 12;
-
-    printf("d_reg = %d ", t_register);
-    printf("n_reg = %d ", n_register);
-    printf("imm = %d\n", immediate);
-
-    mem_write_32(NEXT_STATE.REGS[n_register] + immediate, NEXT_STATE.REGS[t_register] & 0b11111111);
-
-    // Y también supongo que no hay que actualizar los flags
-
-}
-
-
-// STURH --> sturb X1, [X2, #0x10] (descripción: M[X2 + 0x10]15:0) = X1(15:0))
-void sturh(uint32_t instruction){   
-    uint32_t t_register = instruction & 0b11111;
-    uint32_t n_register = (instruction & (0b11111 << 5)) >> 5;
-    uint32_t immediate = (instruction & (0b111111111 << 12)) >> 12;
-
-    printf("d_reg = %d ", t_register);
-    printf("n_reg = %d ", n_register);
-    printf("imm = %d\n", immediate);
-
-    mem_write_32(NEXT_STATE.REGS[n_register] + immediate, NEXT_STATE.REGS[t_register] & 0xFFFF);
-
-    // Y también supongo que no hay que actualizar los flags
-
-}
-
 
 
 // LDUR --> ldur X1, [X2, #0x10] (descripción: X1 = M[X2 + 0x10])
+// QUEDA EN DUDA SI CON LOS PRIMEROS BITS SE REFIERE A LOS MÁS SIGNIFICATIVOS O MENOS SIGNIFICATIVOS
 void ldur(uint32_t instruction){   
     uint32_t t_register = instruction & 0b11111;
     uint32_t n_register = (instruction & (0b11111 << 5)) >> 5;
-    uint32_t immediate = (instruction & (0b111111111 << 12)) >> 12;
+    int64_t immediate = (instruction & (0b111111111 << 12)) >> 12;
 
     printf("d_reg = %d ", t_register);
     printf("n_reg = %d ", n_register);
     printf("imm = %d\n", immediate);
+
+    // Si es 11 --> ldur, si es 01 --> ldurh, si es 00 --> ldurb
+    uint32_t mask = 0b11 << 30;
+    uint32_t type = (instruction & mask) >> 30;
+
+    if (type == 0b11){          // LDUR
+        NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate);
+    } else if (type == 0b01){   // LDURH
+        NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate) & 0xFFFF;
+    } else {                    // LDURB
+        NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate) & 0xFF;
+    }
+
 
     NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate);
 
     //supongo que no hay que actualizar los flags
 }
 
-// LDURH --> ldur X1, [X2, #0x10] (descripción: X1 = 48'b0, M[X2 + 0x10](15:0)
-void ldurh(uint32_t instruction){   
-    uint32_t t_register = instruction & 0b11111;
-    uint32_t n_register = (instruction & (0b11111 << 5)) >> 5;
-    uint32_t immediate = (instruction & (0b111111111 << 12)) >> 12;
-
-    printf("d_reg = %d ", t_register);
-    printf("n_reg = %d ", n_register);
-    printf("imm = %d\n", immediate);
-
-    NEXT_STATE.REGS[t_register] = (NEXT_STATE.REGS[n_register] + immediate) & 0xFFFF;
-
-    //supongo que no hay que actualizar los flags
-}
-
-// LDURB --> ldur X1, [X2, #0x10] (descripción: X1 = 56'b0, M[X2 + 0x10](7:0)
-void ldurb(uint32_t instruction){   
-    uint32_t t_register = instruction & 0b11111;
-    uint32_t n_register = (instruction & (0b11111 << 5)) >> 5;
-    uint32_t immediate = (instruction & (0b111111111 << 12)) >> 12;
-
-    printf("d_reg = %d ", t_register);
-    printf("n_reg = %d ", n_register);
-    printf("imm = %d\n", immediate);
-
-    NEXT_STATE.REGS[t_register] = (NEXT_STATE.REGS[n_register] + immediate) & 0xFF;
-
-    //supongo que no hay que actualizar los flags
-}
 
 // MOVZ --> movz X1, #0x10 (descripción: X1 = 0x10) 
 // hw = 0
@@ -494,7 +444,7 @@ uint32_t decode(uint32_t instruction) {
   
   uint32_t array_opcodes_11[9] = {0b11101011001, 0b11010100010, 0b11101011001, 0b11111000000, 0b00111000000, 
                                   0b01111000000, 0b11111000010, 0b01111000010, 0b00111000010};  
-  // subs ext, hlt, cmp_ext, stur, sturb, sturh, lduzr, ldurh, ldurb
+  // subs ext, hlt, cmp_ext, stur, sturb, sturh, ldur, ldurh, ldurb
   
   uint32_t array_opcodes_22 = 0b1101011000011111000000;   // BR
 
