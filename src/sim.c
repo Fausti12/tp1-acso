@@ -9,9 +9,6 @@
 #include <string.h>
 
 
-//uint32_t array_opcodes[3] = [0xb1, 0xab, 0xf0];  // 10110001, 10101011, 11110000
-
-
 typedef struct Node {
   uint32_t opcode;
   void (*function)(uint32_t);
@@ -273,6 +270,56 @@ void orr_shifted_register(uint32_t instruction){   //adds immediate
 
 }
 
+
+void b(uint32_t instruction){
+  uint32_t imm = instruction & (0xFFFFFFF >>2) ;   //1ros 26 bits
+  uint64_t offset = imm << 2;
+  NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+}
+
+
+void bcond(uint32_t instruction){
+  uint32_t condition = instruction & 0xF;
+  uint32_t imm = (instruction & (0b1111111111111111111 << 5)) >> 5;  //ver pq da mal en beq.x aunque de bien el imm y condition
+
+  uint64_t offset = imm << 2;
+  printf("imm es %x\n", imm);
+  printf("El offset es %x\n", offset);
+  printf("El condition es %x\n", condition);
+  if (condition == 0b0000){   //equal
+    if (CURRENT_STATE.FLAG_Z == 1){
+      NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+    }
+  }
+  else if (condition == 0b0001){  //not equal
+    if (CURRENT_STATE.FLAG_Z == 0){
+      NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+    }
+  }
+  else if (condition == 0b1100){  //greater than
+    if (CURRENT_STATE.FLAG_N == 0){
+      NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+    }
+  }
+  else if (condition == 0b1011){   //less than
+    if (CURRENT_STATE.FLAG_N == 1){
+      NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+    }
+  }
+
+  //Ver si es correcto
+  else if (condition == 0b1010){
+    if (CURRENT_STATE.FLAG_N == 0 && CURRENT_STATE.FLAG_Z == 0){
+      NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+    }
+  }
+  else if (condition == 0b1101){
+    if (CURRENT_STATE.FLAG_N == 1 || CURRENT_STATE.FLAG_Z == 1){
+      NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+    }
+  }
+}
+
 // LSL immediate /// CORREGIR OPCODE
 void lsl_imm(uint32_t instruction){   
     uint32_t dest_register = instruction & 0b11111;
@@ -292,6 +339,7 @@ void lsl_imm(uint32_t instruction){
     }
 }
 
+
 // LSR immediate
 void lsr_imm(uint32_t instruction){   
     uint32_t dest_register = instruction & 0b11111;
@@ -310,6 +358,7 @@ void lsr_imm(uint32_t instruction){
         NEXT_STATE.FLAG_Z = 1;
     }
 }
+
 
 // STUR --> stur X1, [X2, #0x10] (descripción: M[X2 + 0x10] = X1)
 void stur(uint32_t instruction){   
@@ -345,7 +394,7 @@ void sturb(uint32_t instruction){
 
 
 // STURH --> sturb X1, [X2, #0x10] (descripción: M[X2 + 0x10]15:0) = X1(15:0))
-void sturb(uint32_t instruction){   
+void sturh(uint32_t instruction){   
     uint32_t t_register = instruction & 0b11111;
     uint32_t n_register = (instruction & (0b11111 << 5)) >> 5;
     uint32_t immediate = (instruction & (0b111111111111111111111 << 12)) >> 12;
@@ -359,6 +408,8 @@ void sturb(uint32_t instruction){
     // Y también supongo que no hay que actualizar los flags
 
 }
+
+
 
 // LDUR --> ldur X1, [X2, #0x10] (descripción: X1 = M[X2 + 0x10])
 void ldur(uint32_t instruction){   
@@ -421,6 +472,8 @@ void movz(uint32_t instruction){
 }
 
 
+
+
 bool is_subs_ext(uint32_t instruction) { 
     printf("El opcode subs ext es %d\n", ((instruction & (0b11111111111 << 21)) >> 21) + 1);
     return (((instruction& (0b11111111111 << 21)) >> 21) + 1 == 0b11101011001);    //11101011001
@@ -432,10 +485,11 @@ uint32_t decode(uint32_t instruction) {
   // Extract the opcode from the instruction
   uint32_t array_opcodes_6 = 0b000101; // B  
   uint32_t array_opcodes_8[8] = {0xb1, 0xab, 0xf1, 0xea, 0xaa, 0b11101010, 0b1001010, 0xaa, 0b01010100, };  
-  // 10110001, 10101011, 11110000    // adds imm, adds ext, subs imm, cmp imm, ands_shit, eor_shift, orr_shift, b.cond,
+  // adds imm, adds ext, subs imm, cmp imm, ands_shit, eor_shift, orr_shift, b.cond,
   uint32_t array_opcodes_9 = 0b110100101; // movz
-  uint32_t array_opcodes_10[2] = {0b110100110, 0b1101001101}; // lsl_imm, lsr_imm
-  uint32_t array_opcodes_11[9] = {0b11101011001, 0b11010100010, 0b11101011001, 0b11111000000, 0b00111000000, 0b01111000000, 0b11111000010, 0b01111000010, 0b00111000010};  
+  uint32_t array_opcodes_10[2] = {0b1101001101, 0b1101001101}; // lsl_imm, lsr_imm   --------- SON IGUALES -----------
+  uint32_t array_opcodes_11[9] = {0b11101011001, 0b11010100010, 0b11101011001, 0b11111000000, 0b00111000000,
+                                  0b01111000000, 0b11111000010, 0b01111000010, 0b00111000010};  
   // subs ext, hlt, cmp_ext, stur, sturb, sturh, lduzr, ldurh, ldurb
   uint32_t array_opcodes_22 = 0b1101011000011111000000;   // BR
 
@@ -444,9 +498,11 @@ uint32_t decode(uint32_t instruction) {
 
 
 
+  /*
   uint32_t array_opcodes_8[8] = {0xb1, 0xab, 0xf1, 0xea ,0xca, 0xaa  ,0b11101011001, 0b11010100010};
   // índice 0-> adds imm, 1-> adds ext, 2-> subs imm, 3-> ands shifted, 4-> eor shifted,
   // 5-> orr shifted, 6-> subs ext (ver pq al final va 1), 7-> hlt
+  */
 
 
   // Verify if it is an 6 bit opcode
@@ -493,9 +549,11 @@ uint8_t decode_b_cond(uint32_t instruction) {
 
 
 
+
+
 // VIENDO EL OPCODE RETORNADO DECIDO QUE ACCION TOMAR
-void execute(uint32_t opcode, uint32_t instruction) {
-  Node_t array_opcodes[8] = {
+bool execute(uint32_t opcode, uint32_t instruction) {
+  Node_t array_opcodes[10] = {
     {0xb1, adds_imm},
     {0xab, adds_ext_register},
     {0xf1, subs_imm},
@@ -503,47 +561,25 @@ void execute(uint32_t opcode, uint32_t instruction) {
     {0xea, ands_shifted_register},
     {0xca, eor_shifted_register},
     {0xaa, orr_shifted_register},
+    {0x54, bcond},
+    {0b000101, b},
     {0b01010100, 0}
   };
 
   for (int i = 0; i < 8; i++) {
     if (opcode == array_opcodes[i].opcode) {
       printf("Entra al if\n");
+      printf("OPcode es %x\n", opcode);
       array_opcodes[i].function(instruction);
-      return;
+      //if (opcode == 0x54){ return false;}     // si es b.cond no cambia el pc en función process_instruction
+      //else {return true;}   //estaría mal pq si era bcond pero no cumple condición, no hago salto
     }
   }  
   
-  if (opcode == 0b01010100){  //B.CONDITIONS
-    if (decode_b_cond(instruction) == 0){
-      printf("B.eq\n");
-      //B.eq();
-    }
-    else if (decode_b_cond(instruction) == 1){
-      printf("B.ne\n");
-      //B.ne();
-    }
-    else if (decode_b_cond(instruction) == 0b1100){
-      printf("B.gt\n");
-      //B.gt();
-    }
-    else if (decode_b_cond(instruction) == 0b1011){
-      printf("B.lt\n");
-      //B.lt();
-    }
-    else if (decode_b_cond(instruction) == 0b1010){
-      printf("B.ge\n");
-      //B.ge();
-    }
-    else if (decode_b_cond(instruction) == 0b1101){
-      printf("B.le\n");
-      //B.le();
-    }
-  }
   
-  else{
-    printf("No se ejecuto nada\n");
-  }
+  
+  //printf("No se ejecuto nada\n");
+  
   return;
 }
 
@@ -562,13 +598,14 @@ void process_instruction() {
   printf("Instruction: %x\n", instruction);
   // Decode the instruction
   uint32_t opcode = decode(instruction);
-
+  //uint32_t aux_pc = CURRENT_STATE.PC;
   // Execute the instruction
   execute(opcode, instruction);
 
-  // Update the PC
-  NEXT_STATE.PC += 4;
+  // si no cambio en b o bcond
+  if (CURRENT_STATE.PC == NEXT_STATE.PC) {NEXT_STATE.PC += 4;}
   
   return;
 }
+// 400014 en inst 2  pero debería darme 400010
 
