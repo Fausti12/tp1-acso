@@ -315,7 +315,7 @@ void lsr_imm(uint32_t instruction){
 void stur(uint32_t instruction){   
     uint32_t t_register = instruction & 0b11111;
     uint32_t n_register = (instruction & (0b11111 << 5)) >> 5;
-    uint32_t immediate = (instruction & (0b111111111111111111111 << 12)) >> 12;
+    uint32_t immediate = (instruction & (0b111111111 << 12)) >> 12;
 
     printf("d_reg = %d ", t_register);
     printf("n_reg = %d ", n_register);
@@ -331,7 +331,7 @@ void stur(uint32_t instruction){
 void sturb(uint32_t instruction){   
     uint32_t t_register = instruction & 0b11111;
     uint32_t n_register = (instruction & (0b11111 << 5)) >> 5;
-    uint32_t immediate = (instruction & (0b111111111111111111111 << 12)) >> 12;
+    uint32_t immediate = (instruction & (0b111111111 << 12)) >> 12;
 
     printf("d_reg = %d ", t_register);
     printf("n_reg = %d ", n_register);
@@ -345,10 +345,10 @@ void sturb(uint32_t instruction){
 
 
 // STURH --> sturb X1, [X2, #0x10] (descripción: M[X2 + 0x10]15:0) = X1(15:0))
-void sturb(uint32_t instruction){   
+void sturh(uint32_t instruction){   
     uint32_t t_register = instruction & 0b11111;
     uint32_t n_register = (instruction & (0b11111 << 5)) >> 5;
-    uint32_t immediate = (instruction & (0b111111111111111111111 << 12)) >> 12;
+    uint32_t immediate = (instruction & (0b111111111 << 12)) >> 12;
 
     printf("d_reg = %d ", t_register);
     printf("n_reg = %d ", n_register);
@@ -431,22 +431,30 @@ bool is_subs_ext(uint32_t instruction) {
 uint32_t decode(uint32_t instruction) {
   // Extract the opcode from the instruction
   uint32_t array_opcodes_6 = 0b000101; // B  
-  uint32_t array_opcodes_8[8] = {0xb1, 0xab, 0xf1, 0xea, 0xaa, 0b11101010, 0b1001010, 0xaa, 0b01010100, };  
-  // 10110001, 10101011, 11110000    // adds imm, adds ext, subs imm, cmp imm, ands_shit, eor_shift, orr_shift, b.cond,
+
+  uint32_t array_opcodes_8[9] = {0xb1, 0xab, 0xf1, 0xea, 0xaa, 0b11101010, 0b1001010, 0xaa, 0b01010100};  
+  // adds_imm, adds_ext, subs_imm, cmp_imm, ands_shift, eor_shift, orr_shift, b.cond
+  
   uint32_t array_opcodes_9 = 0b110100101; // movz
-  uint32_t array_opcodes_10[2] = {0b110100110, 0b1101001101}; // lsl_imm, lsr_imm
-  uint32_t array_opcodes_11[9] = {0b11101011001, 0b11010100010, 0b11101011001, 0b11111000000, 0b00111000000, 0b01111000000, 0b11111000010, 0b01111000010, 0b00111000010};  
+  
+  uint32_t array_opcodes_10[2] = {0b1101001101, 0b1101001101}; // lsl_imm, lsr_imm SON IGUALES
+  
+  uint32_t array_opcodes_11[9] = {0b11101011001, 0b11010100010, 0b11101011001, 0b11111000000, 0b00111000000, 
+                                  0b01111000000, 0b11111000010, 0b01111000010, 0b00111000010};  
   // subs ext, hlt, cmp_ext, stur, sturb, sturh, lduzr, ldurh, ldurb
+  
   uint32_t array_opcodes_22 = 0b1101011000011111000000;   // BR
+
 
   uint8_t array_b_cond[6] = {0b0, 0b1, 0b1100, 0b1011, 0b1010, 0b1101};   
   //B.:eq, ne, gt, lt, ge, le
 
 
-
+  /*
   uint32_t array_opcodes_8[8] = {0xb1, 0xab, 0xf1, 0xea ,0xca, 0xaa  ,0b11101011001, 0b11010100010};
   // índice 0-> adds imm, 1-> adds ext, 2-> subs imm, 3-> ands shifted, 4-> eor shifted,
   // 5-> orr shifted, 6-> subs ext (ver pq al final va 1), 7-> hlt
+  */
 
 
   // Verify if it is an 6 bit opcode
@@ -455,22 +463,21 @@ uint32_t decode(uint32_t instruction) {
 
   // Verify if it is an 8 bit opcode
   opcode = is_opcode_length_8(instruction, array_opcodes_8);
-  printf("El opcode es %d\n", opcode);
   if (opcode != -1) {return opcode;}
 
-    // Verify if it is an 9 bit opcode
-  uint32_t opcode = (instruction & (0b111111 << 22)) >> 22;
+  // Verify if it is an 9 bit opcode
+  opcode = (instruction & (0b1111111111 << 22)) >> 22;
   if (opcode == array_opcodes_9) {return opcode;}
 
   // Verify if it is an 10 bit opcode
-  opcode = is_opcode_length_10(instruction, array_opcodes_9);
+  opcode = is_opcode_length_10(instruction, array_opcodes_10);
   if (opcode != -1) { return opcode; }
 
   // Verify if it is an 11 bit opcode
   opcode = is_opcode_length_11(instruction, array_opcodes_11);
   if (opcode != -1) {return opcode;}
 
-  if (is_subs_ext(instruction)) {return 0b11101011001;}
+  if (is_subs_ext(instruction)) {return 0b11101011001;}   // ????????
 
   // Verify if it is an 22 bit opcode
   opcode = (instruction & (0b1111111111111111111111 << 10)) >> 10;
@@ -571,4 +578,3 @@ void process_instruction() {
   
   return;
 }
-
