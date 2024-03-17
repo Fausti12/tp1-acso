@@ -1,5 +1,5 @@
 #include "shell.h"
-#//include "decoder.h"
+//include "decoder.h"
 //#include "./instructions/adds_imm.h"
 #include <assert.h>
 #include <inttypes.h>
