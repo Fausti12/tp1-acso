@@ -280,9 +280,9 @@ void b(uint32_t instruction){
 
 void bcond(uint32_t instruction){
   uint32_t condition = instruction & 0xF;
-  uint32_t imm = (instruction & (0b1111111111111111111 << 5)) >> 5;  //ver pq da mal en beq.x aunque de bien el imm y condition
+  int64_t imm = (instruction & (0b1111111111111111111 << 5)) >> 5;  //ver pq da mal en beq.x aunque de bien el imm y condition
 
-  uint64_t offset = imm << 2;
+  int64_t offset = imm << 2;
   printf("imm es %x\n", imm);
   printf("El offset es %x\n", offset);
   printf("El condition es %x\n", condition);
@@ -435,7 +435,7 @@ uint32_t decode(uint32_t instruction) {
   // Extract the opcode from the instruction
   uint32_t array_opcodes_6 = 0b000101; // B  
 
-  uint32_t array_opcodes_8[9] = {0xb1, 0xab, 0xf1, 0xea, 0xaa, 0b11101010, 0b1001010, 0xaa, 0b01010100};  
+  uint32_t array_opcodes_8[7] = {0xb1, 0xab, 0xf1, 0xea, 0xaa, 0b11001010, 0x54};  
   // adds_imm, adds_ext, subs_imm, cmp_imm, ands_shift, eor_shift, orr_shift, b.cond
   
   uint32_t array_opcodes_9 = 0b110100101; // movz
