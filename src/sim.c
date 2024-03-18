@@ -192,7 +192,7 @@ void ands_shifted_register(uint32_t instruction){   //adds immediate
     else if (shift == 0b01){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] >> immediate);}
     //else if (shift == 0b10){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] << NEXT_STATE.REGS[immediate]);}
     //else if (shift == 0b11){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] >> NEXT_STATE.REGS[immediate]);}
-
+    /*
     if (NEXT_STATE.REGS[dest_register] < 0){
         NEXT_STATE.FLAG_N = 1;
     } else if (NEXT_STATE.REGS[dest_register] == 0){
@@ -200,7 +200,7 @@ void ands_shifted_register(uint32_t instruction){   //adds immediate
  
 
 }
-
+*/
 }
 
 
@@ -225,14 +225,14 @@ void eor_shifted_register(uint32_t instruction){   //adds immediate
     else if (shift == 0b01){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] >> immediate);}
     //else if (shift == 0b10){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] << NEXT_STATE.REGS[immediate]);}
     //else if (shift == 0b11){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] >> NEXT_STATE.REGS[immediate]);}
-
+   /*
     if (NEXT_STATE.REGS[dest_register] < 0){
         NEXT_STATE.FLAG_N = 1;
     } else if (NEXT_STATE.REGS[dest_register] == 0){
-        NEXT_STATE.FLAG_Z = 1;
- 
+        NEXT_STATE.FLAG_Z = 1;}
+   */
 
-}
+
 
 }
 
@@ -259,7 +259,7 @@ void orr_shifted_register(uint32_t instruction){   //adds immediate
     else if (shift == 0b01){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] >> immediate);}
     //else if (shift == 0b10){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] << NEXT_STATE.REGS[immediate]);}
     //else if (shift == 0b11){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] >> NEXT_STATE.REGS[immediate]);}
-
+/*
     if (NEXT_STATE.REGS[dest_register] < 0){
         NEXT_STATE.FLAG_N = 1;
     } else if (NEXT_STATE.REGS[dest_register] == 0){
@@ -267,6 +267,7 @@ void orr_shifted_register(uint32_t instruction){   //adds immediate
  
 
 }
+*/
 
 }
 
@@ -394,9 +395,18 @@ void ldur(uint32_t instruction){
     uint32_t mask = 0b11 << 30;
     uint32_t type = (instruction & mask) >> 30;
 
-    if (type == 0b11){          // LDUR
-        NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate);
-    } else if (type == 0b01){   // LDURH
+    if (type == 0b11) { // LDUR
+        uint32_t lower_half = mem_read_32(NEXT_STATE.REGS[n_register] + immediate);
+        uint32_t upper_half = mem_read_32(NEXT_STATE.REGS[n_register] + immediate + 4);
+        uint64_t result = ((uint64_t)upper_half << 32) | (uint64_t) lower_half;
+        printf("lower_half = %x\n", lower_half);
+        printf("upper_half = %x\n", upper_half);
+        printf("El resultado es %x\n", result);
+        printf(" ehed = %x\n", ((uint64_t)upper_half << 8));
+        uint32_t mask_2 = 0xFFFFFFFF;
+        NEXT_STATE.REGS[t_register] = result;
+    }
+    else if (type == 0b01){   // LDURH
         //NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate) & (0xFFFF << 16);
         NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate) & (0xFFFF );
     } else {                    // LDURB
