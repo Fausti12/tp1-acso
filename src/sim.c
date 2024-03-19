@@ -223,9 +223,16 @@ void orr_shifted_register(uint32_t instruction){   //adds immediate
 
 
 void b(uint32_t instruction){
-  uint32_t imm = instruction & (0xFFFFFFF >>2) ;   //1ros 26 bits
-  uint64_t offset = imm << 2;
+  int32_t imm = instruction & (0xFFFFFFF >>2) ;   //1ros 26 bits
+  int64_t offset = imm << 2;
   NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+}
+
+
+//ver
+void br(uint32_t instruction){
+  uint32_t n_register = (instruction & (0b11111 << 5)) >> 5;
+  NEXT_STATE.PC = CURRENT_STATE.REGS[n_register];
 }
 
 
@@ -234,6 +241,19 @@ void bcond(uint32_t instruction){
   int32_t imm = (instruction & (0b1111111111111111111 << 5)) >> 5;  //ver pq da mal en beq.x aunque de bien el imm y condition
 
   int64_t offset = imm << 2;  //ver si es correcto
+  // Verifica si el bit 21 es 1 (indicando un valor negativo)
+  printf("El offset es %x\n", offset);
+  if ((offset & 0x100000) == 0x100000) {
+    // Convierte el offset a un valor negativo
+    offset = ((~offset) + 1);
+    offset = offset & 0x1FFFFF;
+    printf("offset == %d\n", offset);
+    
+    } 
+  printf("El inmediato es %x\n", imm);
+  printf("El offset es %x\n", offset);
+  printf("current pc es %x\n", CURRENT_STATE.PC);
+  printf("pc + offset es %x\n", CURRENT_STATE.PC + offset);
   if (condition == 0b0000){   //equal
     if (CURRENT_STATE.FLAG_Z == 1){
       NEXT_STATE.PC = CURRENT_STATE.PC + offset;
@@ -283,12 +303,13 @@ void lsl_lsr_imm(uint32_t instruction){
         NEXT_STATE.REGS[dest_register] = CURRENT_STATE.REGS[n_register] << (64 - immediate);
     }
 
-    
+  /*  
     if (NEXT_STATE.REGS[dest_register] < 0){
         NEXT_STATE.FLAG_N = 1;
     } else if (NEXT_STATE.REGS[dest_register] == 0){
         NEXT_STATE.FLAG_Z = 1;
     }
+    */
 }
 
 
@@ -333,15 +354,14 @@ void ldur(uint32_t instruction){
     uint32_t type = (instruction & mask) >> 30;
 
     if (type == 0b11) { // LDUR
-        uint32_t lower_half = mem_read_32(NEXT_STATE.REGS[n_register] + immediate);
-        uint32_t upper_half = mem_read_32(NEXT_STATE.REGS[n_register] + immediate + 4);
-        uint64_t result = ((uint64_t)upper_half << 32) | (uint64_t) lower_half;
+        uint64_t lower_half = mem_read_32(NEXT_STATE.REGS[n_register] + immediate);
+        uint64_t upper_half = mem_read_32(NEXT_STATE.REGS[n_register] + immediate + 4);
+        int64_t result = ((uint64_t)upper_half << 32) | (uint64_t) lower_half;
         printf("lower_half = %x\n", lower_half);
         printf("upper_half = %x\n", upper_half);
         printf("El resultado es %x\n", result);
-        printf(" ehed = %x\n", ((uint64_t)upper_half << 8));
-        uint32_t mask_2 = 0xFFFFFFFF;
         NEXT_STATE.REGS[t_register] = result;
+        //NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate);
     }
     else if (type == 0b01){   // LDURH
         //NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate) & (0xFFFF << 16);
@@ -350,9 +370,6 @@ void ldur(uint32_t instruction){
         //NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate) & (0xFF << 24);
         NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate) & (0xFF );
     }
-
-
-    NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate);
 
     //supongo que no hay que actualizar los flags
 }
@@ -461,6 +478,7 @@ bool execute(uint32_t opcode, uint32_t instruction) {
     {0xaa, orr_shifted_register},
     {0x54, bcond},
     {0b000101, b},
+    {0b1101011000011111000000, br},
     {0b110100101, movz},
     {0b1101001101, lsl_lsr_imm},
     {0b11010100010, hlt},
