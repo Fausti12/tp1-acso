@@ -314,30 +314,36 @@ void bcond(uint32_t instruction){
 
 // LSL immediate
 void lsl_lsr_imm(uint32_t instruction){   
-    uint32_t dest_register = instruction & 0b11111;
-    uint32_t n_register = (instruction & (0b11111 << 5)) >> 5;
-    uint32_t immediate = (instruction & (0b111111 << 16)) >> 16;
+  uint32_t dest_register = instruction & 0b11111;
+  uint32_t n_register = (instruction & (0b11111 << 5)) >> 5;
+  uint32_t immediate = (instruction & (0b111111 << 16)) >> 16;
 
-    uint32_t mask = 0b111111 << 10;
+  uint32_t mask = 0b111111 << 10;
 
-    printf("d_reg = %d ", dest_register);
-    printf("n_reg = %d ", n_register);
-    printf("imm = %d\n", immediate);
+  printf("d_reg = %d ", dest_register);
+  printf("n_reg = %d ", n_register);
+  printf("imm = %d\n", immediate);
 
-    // Si la máscara da 0b111111 es LSR, sino es LSL
-    if (((instruction & mask) >> 10) == 0b111111){
-        NEXT_STATE.REGS[dest_register] = CURRENT_STATE.REGS[n_register] >> (64 - immediate);
-    } else {
-        printf("LSL %d\n", CURRENT_STATE.REGS[n_register]);
-        NEXT_STATE.REGS[dest_register] = CURRENT_STATE.REGS[n_register] << (64 - immediate);
-    }
+  // Si la máscara da 0b111111 es LSR, sino es LSL
+  if (((instruction & mask) >> 10) == 0b111111){
+      NEXT_STATE.REGS[dest_register] = CURRENT_STATE.REGS[n_register] >> (64 - immediate);
+  } else {
+      printf("LSL %d\n", CURRENT_STATE.REGS[n_register]);
+      NEXT_STATE.REGS[dest_register] = CURRENT_STATE.REGS[n_register] << (64 - immediate);
+  }
 
-    
-    if (NEXT_STATE.REGS[dest_register] < 0){
-        NEXT_STATE.FLAG_N = 1;
-    } else if (NEXT_STATE.REGS[dest_register] == 0){
-        NEXT_STATE.FLAG_Z = 1;
-    }
+  if (NEXT_STATE.REGS[dest_register] < 0){
+    NEXT_STATE.FLAG_N = 1;
+    NEXT_STATE.FLAG_Z = 0;
+  } 
+  else if (NEXT_STATE.REGS[dest_register] == 0){
+    NEXT_STATE.FLAG_Z = 1;
+    NEXT_STATE.FLAG_N = 0;
+  }
+  else{
+    NEXT_STATE.FLAG_Z = 0;
+    NEXT_STATE.FLAG_N = 0;
+  }
 }
 
 
