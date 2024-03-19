@@ -319,6 +319,7 @@ void bcond(uint32_t instruction){
   }
 }
 
+
 // LSL immediate
 void lsl_lsr_imm(uint32_t instruction){   
     uint32_t dest_register = instruction & 0b11111;
@@ -326,6 +327,11 @@ void lsl_lsr_imm(uint32_t instruction){
     uint32_t immediate = (instruction & (0b111111 << 16)) >> 16;
 
     uint32_t mask = 0b111111 << 10;
+
+    printf("d_reg = %d ", dest_register);
+    printf("n_reg = %d ", n_register);
+    printf("imm = %d\n", immediate);
+
     // Si la máscara da 0b111111 es LSR, sino es LSL
     if (((instruction & mask) >> 10) == 0b111111){
         NEXT_STATE.REGS[dest_register] = CURRENT_STATE.REGS[n_register] >> (64 - immediate);
@@ -334,18 +340,15 @@ void lsl_lsr_imm(uint32_t instruction){
         NEXT_STATE.REGS[dest_register] = CURRENT_STATE.REGS[n_register] << (64 - immediate);
     }
 
-  /*  
+    
     if (NEXT_STATE.REGS[dest_register] < 0){
         NEXT_STATE.FLAG_N = 1;
     } else if (NEXT_STATE.REGS[dest_register] == 0){
         NEXT_STATE.FLAG_Z = 1;
     }
-    */
 }
 
 
-// STUR --> stur X1, [X2, #0x10] (descripción: M[X2 + 0x10] = X1)
-// QUEDA EN DUDA SI CON LOS PRIMEROS BITS SE REFIERE A LOS MÁS SIGNIFICATIVOS O MENOS SIGNIFICATIVOS
 // STUR --> stur X1, [X2, #0x10] (descripción: M[X2 + 0x10] = X1)
 // QUEDA EN DUDA SI CON LOS PRIMEROS BITS SE REFIERE A LOS MÁS SIGNIFICATIVOS O MENOS SIGNIFICATIVOS
 void stur_b_h(uint32_t instruction){   
@@ -391,18 +394,23 @@ void ldur(uint32_t instruction){
     uint32_t mask = 0b11 << 30;
     uint32_t type = (instruction & mask) >> 30;
 
-    if (type == 0b11){          // LDUR
-        NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate);
-    } else if (type == 0b01){   // LDURH
+    if (type == 0b11) { // LDUR
+        uint64_t lower_half = mem_read_32(NEXT_STATE.REGS[n_register] + immediate);
+        uint64_t upper_half = mem_read_32(NEXT_STATE.REGS[n_register] + immediate + 4);
+        // unir ambos valores en un solo uint64_t y que lower quede en los primeros 32 bits y upper en los siguientes 32
+        uint64_t result = lower_half | (upper_half << 32);
+        printf("lower_half = %x\n", lower_half);
+        printf("upper_half = %x\n", upper_half << 32);
+        printf("El resultado es %x\n", result);
+        NEXT_STATE.REGS[t_register] = result;
+    }
+    else if (type == 0b01){   // LDURH
         //NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate) & (0xFFFF << 16);
         NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate) & (0xFFFF );
     } else {                    // LDURB
         //NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate) & (0xFF << 24);
         NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate) & (0xFF );
     }
-
-
-    NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate);
 
     //supongo que no hay que actualizar los flags
 }
@@ -413,6 +421,11 @@ void ldur(uint32_t instruction){
 void movz(uint32_t instruction){   
     uint32_t t_register = instruction & 0b11111;
     uint32_t immediate = (instruction & (0b1111111111111111 << 5)) >> 5;
+    // uint32_t hw = (instruction & (0b11 << 21)) >> 21;
+
+    printf("d_reg = %d ", t_register);
+    printf("imm = %d ", immediate);
+
     NEXT_STATE.REGS[t_register] = immediate;
 
     //supongo que no hay que actualizar los flags
@@ -515,13 +528,12 @@ bool execute(uint32_t opcode, uint32_t instruction) {
     {0b110100101, movz},
     {0b1101001101, lsl_lsr_imm},
     {0b11010100010, hlt},
-    {0b11111000010, ldur},
     {0b11111000000, stur_b_h},
     {0b00111000000, stur_b_h},
     {0b01111000000, stur_b_h},
     {0b11111000010, ldur},
     {0b01111000010, ldur},
-    {0b00111000010, ldur}
+    {0b00111000010, ldur},
     
   };
 
