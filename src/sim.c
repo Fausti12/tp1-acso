@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 typedef struct Node {
   uint32_t opcode;
   void (*function)(uint32_t);
@@ -396,14 +395,13 @@ void ldur(uint32_t instruction){
     uint32_t type = (instruction & mask) >> 30;
 
     if (type == 0b11) { // LDUR
-        uint32_t lower_half = mem_read_32(NEXT_STATE.REGS[n_register] + immediate);
-        uint32_t upper_half = mem_read_32(NEXT_STATE.REGS[n_register] + immediate + 4);
-        uint64_t result = ((uint64_t)upper_half << 32) | (uint64_t) lower_half;
+        uint64_t lower_half = mem_read_32(NEXT_STATE.REGS[n_register] + immediate);
+        uint64_t upper_half = mem_read_32(NEXT_STATE.REGS[n_register] + immediate + 4);
+        // unir ambos valores en un solo uint64_t y que lower quede en los primeros 32 bits y upper en los siguientes 32
+        uint64_t result = lower_half | (upper_half << 32);
         printf("lower_half = %x\n", lower_half);
-        printf("upper_half = %x\n", upper_half);
+        printf("upper_half = %x\n", upper_half << 32);
         printf("El resultado es %x\n", result);
-        printf(" ehed = %x\n", ((uint64_t)upper_half << 8));
-        uint32_t mask_2 = 0xFFFFFFFF;
         NEXT_STATE.REGS[t_register] = result;
     }
     else if (type == 0b01){   // LDURH
@@ -413,9 +411,6 @@ void ldur(uint32_t instruction){
         //NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate) & (0xFF << 24);
         NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate) & (0xFF );
     }
-
-
-    NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate);
 
     //supongo que no hay que actualizar los flags
 }
