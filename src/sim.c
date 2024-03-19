@@ -121,24 +121,46 @@ void subs_imm(uint32_t instruction){   //adds immediate
     uint32_t dest_register = instruction & 0x1F;
     uint32_t n_register = (instruction & (0x1F << 5)) >> 5;
     uint32_t shift = (instruction & (0x3 << 22)) >> 22;
+    int32_t number = 0;
     //solo se hace shift = 01
-    if (shift == 0b01){ immediate = immediate << 12;}
+    if (shift == 0b01){
+        immediate = immediate << 12;
+
+    }
+    
+    
+    if (dest_register != 0b11111) {
+      NEXT_STATE.REGS[dest_register] = CURRENT_STATE.REGS[n_register] - immediate;
+
+      if (NEXT_STATE.REGS[dest_register] < 0){
+          NEXT_STATE.FLAG_N = 1;
+          NEXT_STATE.FLAG_Z = 0;
+      } else if (NEXT_STATE.REGS[dest_register] == 0){
+          NEXT_STATE.FLAG_Z = 1;
+          NEXT_STATE.FLAG_N = 0;
+      } else {
+          NEXT_STATE.FLAG_N = 0;
+          NEXT_STATE.FLAG_Z = 0;
+      }
+    }
     
     // para cmp
-    if (dest_register != 0b11111) {NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] - immediate;}
-
-    if (NEXT_STATE.REGS[n_register] - immediate < 0){
-        NEXT_STATE.FLAG_N = 1;
-    } 
-    else{
-        NEXT_STATE.FLAG_N = 0;}
-    if (NEXT_STATE.REGS[n_register] - immediate == 0){
-        NEXT_STATE.FLAG_Z = 1;
+    else if (dest_register == 0b11111){
+      printf("Entra al cmp\n");
+      number = CURRENT_STATE.REGS[n_register] - immediate;
+      printf("number = %x\n", number);
+      if (number < 0){
+          NEXT_STATE.FLAG_N = 1;
+          NEXT_STATE.FLAG_Z = 0;
+      } else if (number == 0){
+          NEXT_STATE.FLAG_Z = 1;
+          NEXT_STATE.FLAG_N = 0;
+      } else {
+          NEXT_STATE.FLAG_N = 0;
+          NEXT_STATE.FLAG_Z = 0;
+      }
     }
-    else{
-        NEXT_STATE.FLAG_Z = 0;}
 }
-
 
 void subs_ext_register(uint32_t instruction){   //adds extended register
     uint32_t immediate = (instruction & (0x7 << 10)) >> 10;
@@ -146,22 +168,47 @@ void subs_ext_register(uint32_t instruction){   //adds extended register
     uint32_t n_register = (instruction & (0x1F << 5)) >> 5;
     uint32_t option = (instruction & (0x7 << 13)) >> 13;
     uint32_t m_register = (instruction & (0x1F << 16)) >> 16;
-    // para cmp
-    if (dest_register != 0b11111) {NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] - NEXT_STATE.REGS[m_register];}
-
-    if (NEXT_STATE.REGS[n_register] - NEXT_STATE.REGS[m_register] < 0){
-        NEXT_STATE.FLAG_N = 1;
-    } 
-    else{
-        NEXT_STATE.FLAG_N = 0;}
+    int32_t number = 0;
     
-    if (NEXT_STATE.REGS[n_register] - NEXT_STATE.REGS[m_register] == 0){
-        NEXT_STATE.FLAG_Z = 1;
-    }
-    else{
-        NEXT_STATE.FLAG_Z = 0;}
-}
+    if (dest_register != 0b11111) {
+      NEXT_STATE.REGS[dest_register] = CURRENT_STATE.REGS[n_register] - CURRENT_STATE.REGS[m_register];
 
+      if (NEXT_STATE.REGS[dest_register] < 0){
+          printf("entra acaaa");
+          NEXT_STATE.FLAG_N = 1;
+          NEXT_STATE.FLAG_Z = 0;
+      } else if (NEXT_STATE.REGS[dest_register] ==0){
+          NEXT_STATE.FLAG_Z = 1;
+          NEXT_STATE.FLAG_N = 0;
+      } else {
+          NEXT_STATE.FLAG_N = 0;
+          NEXT_STATE.FLAG_Z = 0;
+      }
+    }
+
+    // para cmp
+    else if (dest_register == 0b11111){
+      printf("Entra al cmp_ext\n");
+      printf("number = %x\n", number);
+      printf("Current state regs n_register = %x\n", CURRENT_STATE.REGS[n_register]);
+      printf("Current state regs m_register = %x\n", CURRENT_STATE.REGS[m_register]);
+      number = CURRENT_STATE.REGS[n_register] - CURRENT_STATE.REGS[m_register];
+      printf("number = %x\n", number);
+      if (number < 0){
+          printf("entra aca al menor que 0\n");
+          NEXT_STATE.FLAG_N = 1;
+          NEXT_STATE.FLAG_Z = 0;
+      } else if (number == 0){
+          printf("entra aca al igual a 0\n");
+          NEXT_STATE.FLAG_Z = 1;
+          NEXT_STATE.FLAG_N = 0;
+      } else {
+          printf("entra aca al mayor que 0\n");
+          NEXT_STATE.FLAG_N = 0;
+          NEXT_STATE.FLAG_Z = 0;
+      }
+    }
+}
 
 
 void ands_shifted_register(uint32_t instruction){   //adds immediate
