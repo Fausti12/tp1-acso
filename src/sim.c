@@ -80,9 +80,15 @@ void adds_imm(uint32_t instruction){   //adds immediate
 
     if (NEXT_STATE.REGS[dest_register] < 0){
         NEXT_STATE.FLAG_N = 1;
-    } else if (NEXT_STATE.REGS[dest_register] == 0){
+    } 
+    else{
+        NEXT_STATE.FLAG_N = 0;}
+    
+    if (NEXT_STATE.REGS[dest_register] == 0){
         NEXT_STATE.FLAG_Z = 1;
     }
+    else{
+        NEXT_STATE.FLAG_Z = 0;}
 }
 
 
@@ -98,9 +104,14 @@ void adds_ext_register(uint32_t instruction){   //adds extended register
 
     if (NEXT_STATE.REGS[dest_register] < 0){
         NEXT_STATE.FLAG_N = 1;
-    } else if (NEXT_STATE.REGS[dest_register] == 0){
+    } 
+    else{
+        NEXT_STATE.FLAG_N = 0;}
+    if (NEXT_STATE.REGS[dest_register] == 0){
         NEXT_STATE.FLAG_Z = 1;
     }
+    else{
+        NEXT_STATE.FLAG_Z = 0;}
 }
 
 
@@ -112,19 +123,21 @@ void subs_imm(uint32_t instruction){   //adds immediate
     uint32_t n_register = (instruction & (0x1F << 5)) >> 5;
     uint32_t shift = (instruction & (0x3 << 22)) >> 22;
     //solo se hace shift = 01
-    if (shift == 0b01){
-        immediate = immediate << 12;
-
-    }
+    if (shift == 0b01){ immediate = immediate << 12;}
     
     // para cmp
     if (dest_register != 0b11111) {NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] - immediate;}
 
     if (NEXT_STATE.REGS[n_register] - immediate < 0){
         NEXT_STATE.FLAG_N = 1;
-    } else if (NEXT_STATE.REGS[n_register] - immediate == 0){
+    } 
+    else{
+        NEXT_STATE.FLAG_N = 0;}
+    if (NEXT_STATE.REGS[n_register] - immediate == 0){
         NEXT_STATE.FLAG_Z = 1;
     }
+    else{
+        NEXT_STATE.FLAG_Z = 0;}
 }
 
 
@@ -138,11 +151,16 @@ void subs_ext_register(uint32_t instruction){   //adds extended register
     if (dest_register != 0b11111) {NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] - NEXT_STATE.REGS[m_register];}
 
     if (NEXT_STATE.REGS[n_register] - NEXT_STATE.REGS[m_register] < 0){
-        printf("entra acaaa");
         NEXT_STATE.FLAG_N = 1;
-    } else if (NEXT_STATE.REGS[n_register] - NEXT_STATE.REGS[m_register] ==0){
+    } 
+    else{
+        NEXT_STATE.FLAG_N = 0;}
+    
+    if (NEXT_STATE.REGS[n_register] - NEXT_STATE.REGS[m_register] == 0){
         NEXT_STATE.FLAG_Z = 1;
     }
+    else{
+        NEXT_STATE.FLAG_Z = 0;}
 }
 
 
@@ -159,15 +177,21 @@ void ands_shifted_register(uint32_t instruction){   //adds immediate
     else if (shift == 0b01){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] >> immediate);}
     //else if (shift == 0b10){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] << NEXT_STATE.REGS[immediate]);}
     //else if (shift == 0b11){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] >> NEXT_STATE.REGS[immediate]);}
-    /*
+    
     if (NEXT_STATE.REGS[dest_register] < 0){
         NEXT_STATE.FLAG_N = 1;
-    } else if (NEXT_STATE.REGS[dest_register] == 0){
+    } 
+    else {
+        NEXT_STATE.FLAG_N = 0;}
+    
+    
+    if (NEXT_STATE.REGS[dest_register] == 0){
         NEXT_STATE.FLAG_Z = 1;
- 
 
 }
-*/
+    else{
+        NEXT_STATE.FLAG_Z = 0;}
+
 }
 
 
