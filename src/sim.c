@@ -346,10 +346,17 @@ void lsl_lsr_imm(uint32_t instruction){
 
 // STUR --> stur X1, [X2, #0x10] (descripción: M[X2 + 0x10] = X1)
 // QUEDA EN DUDA SI CON LOS PRIMEROS BITS SE REFIERE A LOS MÁS SIGNIFICATIVOS O MENOS SIGNIFICATIVOS
+// STUR --> stur X1, [X2, #0x10] (descripción: M[X2 + 0x10] = X1)
+// QUEDA EN DUDA SI CON LOS PRIMEROS BITS SE REFIERE A LOS MÁS SIGNIFICATIVOS O MENOS SIGNIFICATIVOS
 void stur_b_h(uint32_t instruction){   
     uint32_t t_register = instruction & 0b11111;
     uint32_t n_register = (instruction & (0b11111 << 5)) >> 5;
     int64_t immediate = (instruction & (0b111111111 << 12)) >> 12;
+
+    printf("d_reg = %d ", t_register);
+    printf("n_reg = %d ", n_register);
+    printf("imm = %d\n", immediate);
+
     // Si es 11 --> stur, si es 01 --> sturh, si es 00 --> sturb
     uint32_t mask = 0b11 << 30;
     uint32_t type = (instruction & mask) >> 30;
@@ -366,7 +373,7 @@ void stur_b_h(uint32_t instruction){
 
     // Y también supongo que no hay que actualizar los flags
 
-}   //USAR EL DE FAUSTO
+}
 
 
 // LDUR --> ldur X1, [X2, #0x10] (descripción: X1 = M[X2 + 0x10])
