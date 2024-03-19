@@ -120,9 +120,9 @@ void subs_imm(uint32_t instruction){   //adds immediate
     // para cmp
     if (dest_register != 0b11111) {NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] - immediate;}
 
-    if (NEXT_STATE.REGS[dest_register] < 0){
+    if (NEXT_STATE.REGS[n_register] - immediate < 0){
         NEXT_STATE.FLAG_N = 1;
-    } else if (NEXT_STATE.REGS[dest_register] == 0){
+    } else if (NEXT_STATE.REGS[n_register] - immediate == 0){
         NEXT_STATE.FLAG_Z = 1;
     }
 }
@@ -137,9 +137,10 @@ void subs_ext_register(uint32_t instruction){   //adds extended register
     // para cmp
     if (dest_register != 0b11111) {NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] - NEXT_STATE.REGS[m_register];}
 
-    if (NEXT_STATE.REGS[dest_register] < 0){
+    if (NEXT_STATE.REGS[n_register] - NEXT_STATE.REGS[m_register] < 0){
+        printf("entra acaaa");
         NEXT_STATE.FLAG_N = 1;
-    } else if (NEXT_STATE.REGS[dest_register] == 0){
+    } else if (NEXT_STATE.REGS[n_register] - NEXT_STATE.REGS[m_register] ==0){
         NEXT_STATE.FLAG_Z = 1;
     }
 }
