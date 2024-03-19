@@ -367,7 +367,7 @@ void stur_b_h(uint32_t instruction){
 
     // Y también supongo que no hay que actualizar los flags
 
-}
+}   //USAR EL DE FAUSTO
 
 
 // LDUR --> ldur X1, [X2, #0x10] (descripción: X1 = M[X2 + 0x10])
