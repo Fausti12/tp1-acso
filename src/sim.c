@@ -212,84 +212,89 @@ void subs_ext_register(uint32_t instruction){   //adds extended register
 
 
 void ands_shifted_register(uint32_t instruction){   //adds immediate
-    uint32_t dest_register = instruction & 0x1F;
-    uint32_t n_register = (instruction & (0x1F << 5)) >> 5;
-    uint32_t immediate = (instruction & (0x7F << 10)) >> 10;    //te dice cuánto shiftear en registro M
-    uint32_t m_register = (instruction & (0x1F << 16)) >> 16;
-    uint32_t shift = (instruction & (0x3 << 22)) >> 22;     //te dice qué tipo de shift (Rm)
-    //shift logical izquierda
-    if (shift == 0b00){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] << immediate);}
-    // shift logical derecha
-    else if (shift == 0b01){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] >> immediate);}
-    //else if (shift == 0b10){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] << NEXT_STATE.REGS[immediate]);}
-    //else if (shift == 0b11){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] >> NEXT_STATE.REGS[immediate]);}
-    
-    if (NEXT_STATE.REGS[dest_register] < 0){
-        NEXT_STATE.FLAG_N = 1;
-    } 
-    else {
-        NEXT_STATE.FLAG_N = 0;}
-    
-    
-    if (NEXT_STATE.REGS[dest_register] == 0){
-        NEXT_STATE.FLAG_Z = 1;
-
-}
-    else{
-        NEXT_STATE.FLAG_Z = 0;}
-
+  uint32_t dest_register = instruction & 0x1F;
+  uint32_t n_register = (instruction & (0x1F << 5)) >> 5;
+  uint32_t immediate = (instruction & (0x7F << 10)) >> 10;    //te dice cuánto shiftear en registro M
+  uint32_t m_register = (instruction & (0x1F << 16)) >> 16;
+  uint32_t shift = (instruction & (0x3 << 22)) >> 22;     //te dice qué tipo de shift (Rm)
+  //shift logical izquierda
+  if (shift == 0b00){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] << immediate);}
+  // shift logical derecha
+  else if (shift == 0b01){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] >> immediate);}
+  //else if (shift == 0b10){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] << NEXT_STATE.REGS[immediate]);}
+  //else if (shift == 0b11){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] >> NEXT_STATE.REGS[immediate]);}
+  
+  if (NEXT_STATE.REGS[dest_register] < 0){
+    NEXT_STATE.FLAG_N = 1;
+    NEXT_STATE.FLAG_Z = 0;
+  } 
+  else if (NEXT_STATE.REGS[dest_register] == 0){
+    NEXT_STATE.FLAG_Z = 1;
+    NEXT_STATE.FLAG_N = 0;
+  }
+  else{
+    NEXT_STATE.FLAG_Z = 0;
+    NEXT_STATE.FLAG_N = 0;
+  }
 }
 
 
 // exclusive or
 void eor_shifted_register(uint32_t instruction){   //adds immediate
-    uint32_t dest_register = instruction & 0x1F;
-    uint32_t n_register = (instruction & (0x1F << 5)) >> 5;
-    uint32_t immediate = (instruction & (0x7F << 10)) >> 10;    //te dice cuánto shiftear en registro M
-    uint32_t m_register = (instruction & (0x1F << 16)) >> 16;
-    uint32_t shift = (instruction & (0x3 << 22)) >> 22;     //te dice qué tipo de shift (Rm)
-  //shift logical izquierda
-    if (shift == 0b00){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] ^ (NEXT_STATE.REGS[m_register] << immediate);}
-    // shift logical derecha
-    else if (shift == 0b01){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] >> immediate);}
-    //else if (shift == 0b10){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] << NEXT_STATE.REGS[immediate]);}
-    //else if (shift == 0b11){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] >> NEXT_STATE.REGS[immediate]);}
-   /*
-    if (NEXT_STATE.REGS[dest_register] < 0){
-        NEXT_STATE.FLAG_N = 1;
-    } else if (NEXT_STATE.REGS[dest_register] == 0){
-        NEXT_STATE.FLAG_Z = 1;}
-   */
+  uint32_t dest_register = instruction & 0x1F;
+  uint32_t n_register = (instruction & (0x1F << 5)) >> 5;
+  uint32_t immediate = (instruction & (0x7F << 10)) >> 10;    //te dice cuánto shiftear en registro M
+  uint32_t m_register = (instruction & (0x1F << 16)) >> 16;
+  uint32_t shift = (instruction & (0x3 << 22)) >> 22;     //te dice qué tipo de shift (Rm)
+//shift logical izquierda
+  if (shift == 0b00){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] ^ (NEXT_STATE.REGS[m_register] << immediate);}
+  // shift logical derecha
+  else if (shift == 0b01){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] >> immediate);}
+  //else if (shift == 0b10){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] << NEXT_STATE.REGS[immediate]);}
+  //else if (shift == 0b11){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] >> NEXT_STATE.REGS[immediate]);}
 
-
-
+  if (NEXT_STATE.REGS[dest_register] < 0){
+    NEXT_STATE.FLAG_N = 1;
+    NEXT_STATE.FLAG_Z = 0;
+  } 
+  else if (NEXT_STATE.REGS[dest_register] == 0){
+    NEXT_STATE.FLAG_Z = 1;
+    NEXT_STATE.FLAG_N = 0;
+  }
+  else{
+    NEXT_STATE.FLAG_Z = 0;
+    NEXT_STATE.FLAG_N = 0;
+  }
 }
 
 
 
 // or
 void orr_shifted_register(uint32_t instruction){   //adds immediate
-    uint32_t dest_register = instruction & 0x1F;
-    uint32_t n_register = (instruction & (0x1F << 5)) >> 5;
-    uint32_t immediate = (instruction & (0x7F << 10)) >> 10;    //te dice cuánto shiftear en registro M
-    uint32_t m_register = (instruction & (0x1F << 16)) >> 16;
-    uint32_t shift = (instruction & (0x3 << 22)) >> 22;     //te dice qué tipo de shift (Rm)
-    //shift logical izquierda
-    if (shift == 0b00){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] | (NEXT_STATE.REGS[m_register] << immediate);}
-    // shift logical derecha
-    else if (shift == 0b01){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] >> immediate);}
-    //else if (shift == 0b10){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] << NEXT_STATE.REGS[immediate]);}
-    //else if (shift == 0b11){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] >> NEXT_STATE.REGS[immediate]);}
-/*
-    if (NEXT_STATE.REGS[dest_register] < 0){
-        NEXT_STATE.FLAG_N = 1;
-    } else if (NEXT_STATE.REGS[dest_register] == 0){
-        NEXT_STATE.FLAG_Z = 1;
- 
-
-}
-*/
-
+  uint32_t dest_register = instruction & 0x1F;
+  uint32_t n_register = (instruction & (0x1F << 5)) >> 5;
+  uint32_t immediate = (instruction & (0x7F << 10)) >> 10;    //te dice cuánto shiftear en registro M
+  uint32_t m_register = (instruction & (0x1F << 16)) >> 16;
+  uint32_t shift = (instruction & (0x3 << 22)) >> 22;     //te dice qué tipo de shift (Rm)
+  //shift logical izquierda
+  if (shift == 0b00){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] | (NEXT_STATE.REGS[m_register] << immediate);}
+  // shift logical derecha
+  else if (shift == 0b01){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] >> immediate);}
+  //else if (shift == 0b10){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] << NEXT_STATE.REGS[immediate]);}
+  //else if (shift == 0b11){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] >> NEXT_STATE.REGS[immediate]);}
+  
+  if (NEXT_STATE.REGS[dest_register] < 0){
+    NEXT_STATE.FLAG_N = 1;
+    NEXT_STATE.FLAG_Z = 0;
+  } 
+  else if (NEXT_STATE.REGS[dest_register] == 0){
+    NEXT_STATE.FLAG_Z = 1;
+    NEXT_STATE.FLAG_N = 0;
+  }
+  else{
+    NEXT_STATE.FLAG_Z = 0;
+    NEXT_STATE.FLAG_N = 0;
+  }
 }
 
 
