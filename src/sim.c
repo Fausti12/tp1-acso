@@ -384,23 +384,18 @@ void ldur(uint32_t instruction){
     uint32_t mask = 0b11 << 30;
     uint32_t type = (instruction & mask) >> 30;
 
-    if (type == 0b11) { // LDUR
-        uint64_t lower_half = mem_read_32(NEXT_STATE.REGS[n_register] + immediate);
-        uint64_t upper_half = mem_read_32(NEXT_STATE.REGS[n_register] + immediate + 4);
-        int64_t result = ((uint64_t)upper_half << 32) | (uint64_t) lower_half;
-        printf("lower_half = %x\n", lower_half);
-        printf("upper_half = %x\n", upper_half);
-        printf("El resultado es %x\n", result);
-        NEXT_STATE.REGS[t_register] = result;
-        //NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate);
-    }
-    else if (type == 0b01){   // LDURH
+    if (type == 0b11){          // LDUR
+        NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate);
+    } else if (type == 0b01){   // LDURH
         //NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate) & (0xFFFF << 16);
         NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate) & (0xFFFF );
     } else {                    // LDURB
         //NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate) & (0xFF << 24);
         NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate) & (0xFF );
     }
+
+
+    NEXT_STATE.REGS[t_register] = mem_read_32(NEXT_STATE.REGS[n_register] + immediate);
 
     //supongo que no hay que actualizar los flags
 }
