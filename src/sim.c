@@ -241,13 +241,16 @@ void bcond(uint32_t instruction){
   int32_t imm = (instruction & (0b1111111111111111111 << 5)) >> 5;  //ver pq da mal en beq.x aunque de bien el imm y condition
 
   int64_t offset = imm << 2;  //ver si es correcto
+  bool negative = false;
   // Verifica si el bit 21 es 1 (indicando un valor negativo)
   printf("El offset es %x\n", offset);
   if ((offset & 0x100000) == 0x100000) {
     // Convierte el offset a un valor negativo
     offset = ((~offset) + 1);
+    printf("offset == %x\n", offset);
     offset = offset & 0x1FFFFF;
-    printf("offset == %d\n", offset);
+    printf("offset == %x\n", offset);
+    negative = true;
     
     } 
   printf("El inmediato es %x\n", imm);
@@ -256,22 +259,26 @@ void bcond(uint32_t instruction){
   printf("pc + offset es %x\n", CURRENT_STATE.PC + offset);
   if (condition == 0b0000){   //equal
     if (CURRENT_STATE.FLAG_Z == 1){
-      NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+      if (negative==true) {NEXT_STATE.PC = CURRENT_STATE.PC - offset;}
+      else {NEXT_STATE.PC = CURRENT_STATE.PC + offset;}
     }
   }
   else if (condition == 0b0001){  //not equal
     if (CURRENT_STATE.FLAG_Z == 0){
-      NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+      if (negative==true) {NEXT_STATE.PC = CURRENT_STATE.PC - offset;}
+      else {NEXT_STATE.PC = CURRENT_STATE.PC + offset;}
     }
   }
   else if (condition == 0b1100){  //greater than
     if (CURRENT_STATE.FLAG_N == 0){
-      NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+      if (negative==true) {NEXT_STATE.PC = CURRENT_STATE.PC - offset;}
+      else {NEXT_STATE.PC = CURRENT_STATE.PC + offset;}
     }
   }
   else if (condition == 0b1011){   //less than
     if (CURRENT_STATE.FLAG_N == 1){
-      NEXT_STATE.PC = CURRENT_STATE.PC + offset;
+     if (negative==true) {NEXT_STATE.PC = CURRENT_STATE.PC - offset;}
+      else {NEXT_STATE.PC = CURRENT_STATE.PC + offset;}
     }
   }
 
