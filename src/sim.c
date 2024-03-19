@@ -80,15 +80,14 @@ void adds_imm(uint32_t instruction){   //adds immediate
 
     if (NEXT_STATE.REGS[dest_register] < 0){
         NEXT_STATE.FLAG_N = 1;
-    } 
-    else{
-        NEXT_STATE.FLAG_N = 0;}
-    
-    if (NEXT_STATE.REGS[dest_register] == 0){
+        NEXT_STATE.FLAG_Z = 0;
+    } else if (NEXT_STATE.REGS[dest_register] == 0){
         NEXT_STATE.FLAG_Z = 1;
+        NEXT_STATE.FLAG_N = 0;
+    } else {
+        NEXT_STATE.FLAG_N = 0;
+        NEXT_STATE.FLAG_Z = 0;
     }
-    else{
-        NEXT_STATE.FLAG_Z = 0;}
 }
 
 
@@ -104,14 +103,14 @@ void adds_ext_register(uint32_t instruction){   //adds extended register
 
     if (NEXT_STATE.REGS[dest_register] < 0){
         NEXT_STATE.FLAG_N = 1;
-    } 
-    else{
-        NEXT_STATE.FLAG_N = 0;}
-    if (NEXT_STATE.REGS[dest_register] == 0){
+        NEXT_STATE.FLAG_Z = 0;
+    } else if (NEXT_STATE.REGS[dest_register] == 0){
         NEXT_STATE.FLAG_Z = 1;
+        NEXT_STATE.FLAG_N = 0;
+    } else {
+        NEXT_STATE.FLAG_N = 0;
+        NEXT_STATE.FLAG_Z = 0;
     }
-    else{
-        NEXT_STATE.FLAG_Z = 0;}
 }
 
 
@@ -295,25 +294,25 @@ void bcond(uint32_t instruction){
     }
   }
   else if (condition == 0b1100){  //greater than
-    if (CURRENT_STATE.FLAG_N == 0){
+    if (CURRENT_STATE.FLAG_N == 0 && CURRENT_STATE.FLAG_Z == 0){
       if (negative==true) {NEXT_STATE.PC = CURRENT_STATE.PC - offset;}
       else {NEXT_STATE.PC = CURRENT_STATE.PC + offset;}
     }
   }
   else if (condition == 0b1011){   //less than
-    if (CURRENT_STATE.FLAG_N == 1){
+    if (CURRENT_STATE.FLAG_N == 1 && CURRENT_STATE.FLAG_Z == 0){
      if (negative==true) {NEXT_STATE.PC = CURRENT_STATE.PC - offset;}
       else {NEXT_STATE.PC = CURRENT_STATE.PC + offset;}
     }
   }
 
   //Ver si es correcto
-  else if (condition == 0b1010){
-    if (CURRENT_STATE.FLAG_N == 0 && CURRENT_STATE.FLAG_Z == 0){
+  else if (condition == 0b1010){  // greater or equal
+    if (CURRENT_STATE.FLAG_N == 0){
       NEXT_STATE.PC = CURRENT_STATE.PC + offset;
     }
   }
-  else if (condition == 0b1101){
+  else if (condition == 0b1101){  // less or equal
     if (CURRENT_STATE.FLAG_N == 1 || CURRENT_STATE.FLAG_Z == 1){
       NEXT_STATE.PC = CURRENT_STATE.PC + offset;
     }
