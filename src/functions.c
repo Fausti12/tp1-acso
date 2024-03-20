@@ -1,5 +1,42 @@
 #include "functions.h"
 
+//EXTRAS
+
+void add_imm(uint32_t instruction){
+  uint32_t immediate = (instruction & (0xFFF << 10)) >> 10;
+  uint32_t dest_register = instruction & 0x1F;
+  uint32_t n_register = (instruction & (0x1F << 5)) >> 5;
+  uint32_t shift = (instruction & (0x3 << 22)) >> 22;
+  uint64_t extend_immediate = 0;
+  if (shift == 0b01){
+    extend_immediate = immediate;
+    extend_immediate = extend_immediate << 12;
+  }
+
+  else if (shift == 0b00){ extend_immediate = immediate; }
+  NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] + extend_immediate;
+}
+
+void add_ext_register(uint32_t instruction){
+  uint32_t immediate = (instruction & (0x7 << 10)) >> 10;
+  uint32_t dest_register = instruction & 0x1F;
+  uint32_t n_register = (instruction & (0x1F << 5)) >> 5;
+  uint32_t option = (instruction & (0x7 << 13)) >> 13;
+  uint32_t m_register = (instruction & (0x1F << 16)) >> 16;
+  NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] + NEXT_STATE.REGS[m_register];
+}
+
+void mul(uint32_t instruction){
+  uint32_t dest_register = instruction & 0x1F;
+  uint32_t n_register = (instruction & (0x1F << 5)) >> 5;
+  uint32_t m_register = (instruction & (0x1F << 16)) >> 16;
+  NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] * NEXT_STATE.REGS[m_register];
+}
+
+
+
+
+
 void adds_imm(uint32_t instruction){   //adds immediate
     uint32_t immediate = (instruction & (0xFFF << 10)) >> 10;
     uint32_t dest_register = instruction & 0x1F;
@@ -128,10 +165,6 @@ void subs_ext_register(uint32_t instruction){   //adds extended register
 
     // para cmp
     else if (dest_register == 0b11111){
-      printf("Entra al cmp_ext\n");
-      printf("number = %x\n", number);
-      printf("Current state regs n_register = %x\n", CURRENT_STATE.REGS[n_register]);
-      printf("Current state regs m_register = %x\n", CURRENT_STATE.REGS[m_register]);
       number = CURRENT_STATE.REGS[n_register] - CURRENT_STATE.REGS[m_register];
       printf("number = %x\n", number);
       if (number < 0){
@@ -161,9 +194,7 @@ void ands_shifted_register(uint32_t instruction){   //adds immediate
   if (shift == 0b00){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] << immediate);}
   // shift logical derecha
   else if (shift == 0b01){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] >> immediate);}
-  //else if (shift == 0b10){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] << NEXT_STATE.REGS[immediate]);}
-  //else if (shift == 0b11){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] >> NEXT_STATE.REGS[immediate]);}
-  
+
   if (NEXT_STATE.REGS[dest_register] < 0){
     NEXT_STATE.FLAG_N = 1;
     NEXT_STATE.FLAG_Z = 0;
@@ -245,10 +276,7 @@ void bcond(uint32_t instruction){
     negative = true;
     
     } 
-  printf("El inmediato es %x\n", imm);
-  printf("El offset es %x\n", offset);
-  printf("current pc es %x\n", CURRENT_STATE.PC);
-  printf("pc + offset es %x\n", CURRENT_STATE.PC + offset);
+
   if (condition == 0b0000){   //equal
     if (CURRENT_STATE.FLAG_Z == 1){
       if (negative==true) {NEXT_STATE.PC = CURRENT_STATE.PC - offset;}

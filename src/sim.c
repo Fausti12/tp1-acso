@@ -9,7 +9,10 @@ typedef struct Node {
 
 // VIENDO EL OPCODE RETORNADO DECIDO QUE ACCION TOMAR
 void execute(uint32_t opcode, uint32_t instruction) {
-  Node_t array_opcodes[19] = {
+  Node_t array_opcodes[22] = {
+    {0x91, add_imm},
+    {0b10001011000, add_ext_register},
+    {0b10011011000, mul},
     {0xb1, adds_imm},
     {0xab, adds_ext_register},
     {0xf1, subs_imm},
@@ -36,6 +39,7 @@ void execute(uint32_t opcode, uint32_t instruction) {
     if (opcode == array_opcodes[i].opcode) {
       printf("Entra al if\n");
       printf("OPcode es %x\n", opcode);
+      printf("i = %d\n", i);
       array_opcodes[i].function(instruction);
       return;
       //if (opcode == 0x54){ return false;}     // si es b.cond no cambia el pc en función process_instruction

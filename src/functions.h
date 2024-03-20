@@ -2,6 +2,11 @@
 #include <stdbool.h>
 #include <inttypes.h>
 #include "shell.h"
+void add_imm(uint32_t instruction);
+
+void add_ext_register(uint32_t instruction);
+
+void mul(uint32_t instruction);
 
 void adds_imm(uint32_t instruction);
 
