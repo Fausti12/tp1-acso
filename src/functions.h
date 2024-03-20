@@ -32,3 +32,7 @@ void ldur(uint32_t instruction);
 void movz(uint32_t instruction);
 
 void hlt(uint32_t instruction);
+
+void cbz(uint32_t instruction);
+
+void cbnz(uint32_t instruction);

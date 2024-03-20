@@ -10,7 +10,7 @@ uint32_t is_opcode_length_8(uint32_t instruction, uint32_t* array_opcodes) {
   printf("array op [0] = %x\n", array_opcodes[0]);
   uint32_t result =  (instruction & (0xFF << 24)) >> 24;
   printf("result = %x\n", result);
-  for (int i = 0; i < 8; i++) {    //i llega hasta la cantidad de opcodes de ese largo
+  for (int i = 0; i < 10; i++) {    //i llega hasta la cantidad de opcodes de ese largo
     //printf("El valor array es %x\n", array_opcodes[i]);
     if (result == array_opcodes[i]) {
       printf("El valor de i es %d\n", i);
@@ -21,21 +21,12 @@ uint32_t is_opcode_length_8(uint32_t instruction, uint32_t* array_opcodes) {
 
 }
 
-<<<<<<< HEAD
-uint32_t is_opcode_length_9(uint32_t instruction, uint32_t* array_opcodes) {
-  uint32_t result =  (instruction & (0b111111111 << 23)) >> 23;
-  for (int i = 0; i < 3; i++) {    //i llega hasta la cantidad de opcodes de ese largo
-    //printf("El valor array es %x\n", array_opcodes[i]);
-    if (result == array_opcodes_9[i]) {
-      return i;
-=======
 uint32_t is_opcode_length_10(uint32_t instruction, uint32_t* array_opcodes) {
   uint32_t result =  (instruction & (0b111111111 << 22)) >> 22;
   for (int i = 0; i < 2; i++) {    //i llega hasta la cantidad de opcodes de ese largo
     //printf("El valor array es %x\n", array_opcodes[i]);
     if (result == array_opcodes[i]) {
       return array_opcodes[i];
->>>>>>> origin/Bryan
     }
   }
   return -1;
@@ -46,29 +37,19 @@ uint32_t is_opcode_length_11(uint32_t instruction, uint32_t* array_opcodes) {
   uint32_t result =  (instruction & (0b11111111111 << 21)) >> 21;
   for (int i = 0; i < 9; i++) {    //i llega hasta la cantidad de opcodes de ese largo
     //printf("El valor array es %x\n", array_opcodes[i]);
-<<<<<<< HEAD
-    if (result == array_opcodes_11[i]) {
-      return i;
-=======
     if (result == array_opcodes[i]) {
       return array_opcodes[i];
->>>>>>> origin/Bryan
     }
   }
   return -1;
 
 }
 
-<<<<<<< HEAD
-
-uint32_t decode(uint32_t instruction) {
-  // Extract the opcode from the instruction
-=======
 uint32_t decode(uint32_t instruction) {
   // Extract the opcode from the instruction
   uint32_t array_opcodes_6 = 0b000101; // B  
 
-  uint32_t array_opcodes_8[7] = {0xb1, 0xab, 0xf1, 0xea, 0xaa, 0xca, 0x54};  
+  uint32_t array_opcodes_8[9] = {0xb1, 0xab, 0xf1, 0xea, 0xaa, 0xca, 0x54, 0xb4, 0xb5};  
   // adds_imm, adds_ext, subs_imm, cmp_imm, ands_shift, eor_shift, orr_shift, b.cond
   
   uint32_t array_opcodes_9 = 0b110100101; // movz
@@ -84,21 +65,12 @@ uint32_t decode(uint32_t instruction) {
 
   uint8_t array_b_cond[6] = {0b0, 0b1, 0b1100, 0b1011, 0b1010, 0b1101};   
   //B.:eq, ne, gt, lt, ge, le
->>>>>>> origin/Bryan
 
   // Verify if it is an 6 bit opcode
   uint32_t opcode = (instruction & (0b111111 << 26)) >> 26;
   if (opcode == array_opcodes_6) {return opcode;}
 
   // Verify if it is an 8 bit opcode
-<<<<<<< HEAD
-  uint32_t opcode = is_opcode_length_8(instruction, array_opcodes_8);
-  if (opcode != -1) {return opcode;}
-
-  // Verify if it is an 9 bit opcode
-  opcode = is_opcode_length_9(instruction, array_opcodes_9);
-  if (opcode != -1) { return opcode; }
-=======
   opcode = is_opcode_length_8(instruction, array_opcodes_8);
   if (opcode != -1) {return opcode;}
 
@@ -112,17 +84,13 @@ uint32_t decode(uint32_t instruction) {
   if (opcode == array_opcodes_10) { 
     printf("El opcode de 10 bits es %x\n", opcode);
     return opcode; }
->>>>>>> origin/Bryan
 
   // Verify if it is an 11 bit opcode
   opcode = is_opcode_length_11(instruction, array_opcodes_11);
   if (opcode != -1) {return opcode;}
 
-<<<<<<< HEAD
-=======
   if (is_subs_ext(instruction)) {return 0b11101011001;}   // ????????
 
->>>>>>> origin/Bryan
   // Verify if it is an 22 bit opcode
   opcode = (instruction & (0b1111111111111111111111 << 10)) >> 10;
   if (opcode == array_opcodes_22) {return opcode;}
@@ -131,10 +99,7 @@ uint32_t decode(uint32_t instruction) {
 }
 
 uint8_t decode_b_cond(uint32_t instruction) {
-<<<<<<< HEAD
-=======
   uint8_t array_b_cond[6] = {0b0, 0b1, 0b1100, 0b1011, 0b1010, 0b1101};  
->>>>>>> origin/Bryan
   uint8_t result = instruction & 0b1111;
   for (int i = 0; i < 6; i++) {
     if (result == array_b_cond[i]) {
@@ -142,31 +107,4 @@ uint8_t decode_b_cond(uint32_t instruction) {
     }
   }
   return -1;
-<<<<<<< HEAD
 }
-
-
-/*
-// FUNCIONES PARA SABER SI UN OPCODE ES TAL INSTRUCCION O NO
-bool is_adds_imm(uint32_t instruction) { 
-    printf("El opcode imm es %x\n", (instruction & (0xFF << 24)) >> 24);
-    return (((instruction & (0xFF << 24)) >> 24) == 0xb1);   //10110001
-}
-bool is_adds_ext(uint32_t instruction) { 
-    printf("El opcode ext es %x\n", (instruction & (0xFF << 24)) >> 24);
-    return (((instruction & (0xFF << 24)) >> 24) == 0xab);    //10101011
-}
-
-bool is_subs_imm(uint32_t instruction) {   //VER
-    printf("El opcode subs imm es %x\n", (instruction & (0xFF << 24)) >> 24);
-    return (((instruction & (0xFF << 24)) >> 24) == 0xf1);   //11110000  (el ult es 0?)
-}
-
-bool is_subs_ext(uint32_t instruction) { 
-    printf("El opcode subs ext es %d\n", ((instruction & (0b11111111111 << 21)) >> 21) + 1);
-    return (((instruction& (0b11111111111 << 21)) >> 21) + 1 == 0b11101011001);    //11101011001
-}
-*/
-=======
-}
->>>>>>> origin/Bryan

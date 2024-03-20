@@ -9,7 +9,7 @@ typedef struct Node {
 
 // VIENDO EL OPCODE RETORNADO DECIDO QUE ACCION TOMAR
 void execute(uint32_t opcode, uint32_t instruction) {
-  Node_t array_opcodes[19] = {
+  Node_t array_opcodes[21] = {
     {0xb1, adds_imm},
     {0xab, adds_ext_register},
     {0xf1, subs_imm},
@@ -29,7 +29,8 @@ void execute(uint32_t opcode, uint32_t instruction) {
     {0b11111000010, ldur},
     {0b01111000010, ldur},
     {0b00111000010, ldur},
-    
+    {0b10110100, cbz},
+    {0b10110101, cbnz}
   };
 
   for (int i = 0; i < sizeof(array_opcodes)/sizeof(array_opcodes[0]); i++) {

@@ -396,3 +396,45 @@ void movz(uint32_t instruction){
 void hlt(uint32_t instruction){
   RUN_BIT = 0;
 }
+
+void cbz(uint32_t instruction){
+  uint32_t t_register = instruction & 0b11111;
+  int32_t imm = (instruction & (0b1111111111111111111 << 5)) >> 5;  
+  int64_t offset = imm << 2;  
+  bool negative = false;
+  // Verifica si el bit 21 es 1 (indicando un valor negativo)
+  printf("El offset es %x\n", offset);
+  if ((offset & 0x100000) == 0x100000) {
+    // Convierte el offset a un valor negativo
+    offset = ((~offset) + 1);
+    printf("offset == %x\n", offset);
+    offset = offset & 0x1FFFFF;
+    printf("offset == %x\n", offset);
+    negative = true;  
+  } 
+  if (CURRENT_STATE.REGS[t_register] == 0){
+    if (negative==true) {NEXT_STATE.PC = CURRENT_STATE.PC - offset;}
+    else {NEXT_STATE.PC = CURRENT_STATE.PC + offset;}
+  }
+}
+
+void cbnz(uint32_t instruction){
+  uint32_t t_register = instruction & 0b11111;
+  int32_t imm = (instruction & (0b1111111111111111111 << 5)) >> 5;  
+  int64_t offset = imm << 2;  
+  bool negative = false;
+  // Verifica si el bit 21 es 1 (indicando un valor negativo)
+  printf("El offset es %x\n", offset);
+  if ((offset & 0x100000) == 0x100000) {
+    // Convierte el offset a un valor negativo
+    offset = ((~offset) + 1);
+    printf("offset == %x\n", offset);
+    offset = offset & 0x1FFFFF;
+    printf("offset == %x\n", offset);
+    negative = true;  
+  } 
+  if (CURRENT_STATE.REGS[t_register] != 0){
+    if (negative==true) {NEXT_STATE.PC = CURRENT_STATE.PC - offset;}
+    else {NEXT_STATE.PC = CURRENT_STATE.PC + offset;}
+  }
+}
