@@ -87,7 +87,7 @@ void adds_ext_register(uint32_t instruction){   //adds extended register
 
 
 // se usa también para cmp imm
-void subs_imm(uint32_t instruction){   //subs immediate
+void subs_imm(uint32_t instruction){   
   uint32_t immediate = (instruction & (0xFFF << 10)) >> 10;
   uint32_t dest_register = instruction & 0x1F;
   uint32_t n_register = (instruction & (0x1F << 5)) >> 5;
@@ -95,10 +95,7 @@ void subs_imm(uint32_t instruction){   //subs immediate
   int32_t number = 0;
 
   //solo se hace shift = 01
-  if (shift == 0b01){
-      immediate = immediate << 12;
-
-  }
+  if (shift == 0b01){immediate = immediate << 12;}
   
   if (dest_register != 0b11111) {
     NEXT_STATE.REGS[dest_register] = CURRENT_STATE.REGS[n_register] - immediate;
@@ -115,7 +112,7 @@ void subs_imm(uint32_t instruction){   //subs immediate
     }
   }
   
-  // para cmp
+  // en caso de cmp
   else if (dest_register == 0b11111){
     number = CURRENT_STATE.REGS[n_register] - immediate;
     if (number < 0){
@@ -131,7 +128,7 @@ void subs_imm(uint32_t instruction){   //subs immediate
   }
 }
 
-void subs_ext_register(uint32_t instruction){   //subs extended register
+void subs_ext_register(uint32_t instruction){   
   uint32_t immediate = (instruction & (0x7 << 10)) >> 10;
   uint32_t dest_register = instruction & 0x1F;
   uint32_t n_register = (instruction & (0x1F << 5)) >> 5;
@@ -154,7 +151,7 @@ void subs_ext_register(uint32_t instruction){   //subs extended register
     }
   }
 
-  // para cmp
+  // en caso de cmp
   else if (dest_register == 0b11111){
     number = CURRENT_STATE.REGS[n_register] - CURRENT_STATE.REGS[m_register];
     if (number < 0){
@@ -176,7 +173,7 @@ void ands_shifted_register(uint32_t instruction){
   uint32_t n_register = (instruction & (0x1F << 5)) >> 5;
   uint32_t immediate = (instruction & (0x7F << 10)) >> 10;  
   uint32_t m_register = (instruction & (0x1F << 16)) >> 16;
-  uint32_t shift = (instruction & (0x3 << 22)) >> 22;     //indicates the typo of shift (Rm)
+  uint32_t shift = (instruction & (0x3 << 22)) >> 22;    
   
   // left logical shift
   if (shift == 0b00){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] << immediate);}
@@ -238,7 +235,6 @@ void b(uint32_t instruction){
 }
 
 
-//ver
 void br(uint32_t instruction){
   uint32_t n_register = (instruction & (0b11111 << 5)) >> 5;
   NEXT_STATE.PC = CURRENT_STATE.REGS[n_register];
@@ -247,9 +243,9 @@ void br(uint32_t instruction){
 
 void bcond(uint32_t instruction){
   uint32_t condition = instruction & 0xF;
-  int32_t imm = (instruction & (0b1111111111111111111 << 5)) >> 5;  //ver pq da mal en beq.x aunque de bien el imm y condition
+  int32_t imm = (instruction & (0b1111111111111111111 << 5)) >> 5;  
 
-  int64_t offset = imm << 2;  //ver si es correcto
+  int64_t offset = imm << 2;  
   bool negative = false;
 
   if ((offset & 0x100000) == 0x100000) {
@@ -327,10 +323,8 @@ void stur_b_h(uint32_t instruction){
   if (type == 0b11){          // STUR
       mem_write_32(NEXT_STATE.REGS[n_register] + immediate, NEXT_STATE.REGS[t_register]);
   } else if (type == 0b01){   // STURH
-      //mem_write_32(NEXT_STATE.REGS[n_register] + immediate, NEXT_STATE.REGS[t_register] & (0xFFFF << 16));
       mem_write_32(NEXT_STATE.REGS[n_register] + immediate, NEXT_STATE.REGS[t_register] & (0xFFFF ));
   } else {                    // STURB
-      //mem_write_32(NEXT_STATE.REGS[n_register] + immediate, NEXT_STATE.REGS[t_register] & (0xFF << 24));
       mem_write_32(NEXT_STATE.REGS[n_register] + immediate, NEXT_STATE.REGS[t_register] & (0xFF ));
   }
 }

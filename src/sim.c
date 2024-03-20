@@ -7,7 +7,6 @@ typedef struct Node {
   void (*function)(uint32_t);
 } Node_t;
 
-// VIENDO EL OPCODE RETORNADO DECIDO QUE ACCION TOMAR
 void execute(uint32_t opcode, uint32_t instruction) {
   Node_t array_opcodes[24] = {
     {0x91, add_imm},
@@ -46,22 +45,12 @@ void execute(uint32_t opcode, uint32_t instruction) {
 }
 
 void process_instruction() {
-  /* execute one instruction here. You should use CURRENT_STATE and modify
-   * values in NEXT_STATE. You can call mem_read_32() and mem_write_32() to
-   * access memory.
-   *
-   * Sugerencia: hagan una funcion para decode()
-   *             y otra para execute()
-   *
-   * */
-
-  uint32_t instruction = mem_read_32(CURRENT_STATE.PC); // Here we have the 32 bits instruction
-  // Decode the instruction
+  uint32_t instruction = mem_read_32(CURRENT_STATE.PC); 
+  // Decodifica instrucción
   uint32_t opcode = decode(instruction);
-  // Execute the instruction
+  // Ejecuta instrucción
   execute(opcode, instruction);
-
-  // si no cambio en b o bcond
+  // si no se cambió el PC en instrucciones de salto, se incrementa en 4
   if (CURRENT_STATE.PC == NEXT_STATE.PC) {NEXT_STATE.PC += 4;}
   
   return;
