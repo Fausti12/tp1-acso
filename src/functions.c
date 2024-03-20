@@ -193,18 +193,6 @@ void eor_shifted_register(uint32_t instruction){   //adds immediate
   //else if (shift == 0b10){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] << NEXT_STATE.REGS[immediate]);}
   //else if (shift == 0b11){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] >> NEXT_STATE.REGS[immediate]);}
 
-  if (NEXT_STATE.REGS[dest_register] < 0){
-    NEXT_STATE.FLAG_N = 1;
-    NEXT_STATE.FLAG_Z = 0;
-  } 
-  else if (NEXT_STATE.REGS[dest_register] == 0){
-    NEXT_STATE.FLAG_Z = 1;
-    NEXT_STATE.FLAG_N = 0;
-  }
-  else{
-    NEXT_STATE.FLAG_Z = 0;
-    NEXT_STATE.FLAG_N = 0;
-  }
 }
 
 
@@ -222,19 +210,7 @@ void orr_shifted_register(uint32_t instruction){   //adds immediate
   else if (shift == 0b01){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] >> immediate);}
   //else if (shift == 0b10){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] << NEXT_STATE.REGS[immediate]);}
   //else if (shift == 0b11){NEXT_STATE.REGS[dest_register] = NEXT_STATE.REGS[n_register] & (NEXT_STATE.REGS[m_register] >> NEXT_STATE.REGS[immediate]);}
-  
-  if (NEXT_STATE.REGS[dest_register] < 0){
-    NEXT_STATE.FLAG_N = 1;
-    NEXT_STATE.FLAG_Z = 0;
-  } 
-  else if (NEXT_STATE.REGS[dest_register] == 0){
-    NEXT_STATE.FLAG_Z = 1;
-    NEXT_STATE.FLAG_N = 0;
-  }
-  else{
-    NEXT_STATE.FLAG_Z = 0;
-    NEXT_STATE.FLAG_N = 0;
-  }
+
 }
 
 
@@ -332,18 +308,6 @@ void lsl_lsr_imm(uint32_t instruction){
       NEXT_STATE.REGS[dest_register] = CURRENT_STATE.REGS[n_register] << (64 - immediate);
   }
 
-  if (NEXT_STATE.REGS[dest_register] < 0){
-    NEXT_STATE.FLAG_N = 1;
-    NEXT_STATE.FLAG_Z = 0;
-  } 
-  else if (NEXT_STATE.REGS[dest_register] == 0){
-    NEXT_STATE.FLAG_Z = 1;
-    NEXT_STATE.FLAG_N = 0;
-  }
-  else{
-    NEXT_STATE.FLAG_Z = 0;
-    NEXT_STATE.FLAG_N = 0;
-  }
 }
 
 
