@@ -1,5 +1,5 @@
 .text
-cmp X11, X12
+cmp X11, 12
 blt foo
 adds X2, X0, 10
 

@@ -1,16 +1,15 @@
-#include <assert.h>
 #include <inttypes.h>
-#include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdint.h>
+#include <stdbool.h>
 
-uint32_t is_opcode_length_11(instruction, array_opcodes_11);
-uint32_t is_opcode_length_9(instruction, array_opcodes_9);
-uint32_t is_opcode_length_8(instruction, array_opcodes_8);
+bool is_subs_ext(uint32_t instruction);
 
-uint32_t decode(instruction);
+uint32_t is_opcode_length_8(uint32_t instruction, uint32_t* array_opcodes);
+
+uint32_t is_opcode_length_10(uint32_t instruction, uint32_t* array_opcodes);
+
+uint32_t is_opcode_length_11(uint32_t instruction, uint32_t* array_opcodes);
+
+uint32_t decode(uint32_t instruction); 
+
 uint8_t decode_b_cond(uint32_t instruction);
-
-
