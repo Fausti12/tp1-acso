@@ -6,8 +6,6 @@ bool is_subs_ext(uint32_t instruction);
 
 uint32_t is_opcode_length_8(uint32_t instruction, uint32_t* array_opcodes);
 
-uint32_t is_opcode_length_10(uint32_t instruction, uint32_t* array_opcodes);
-
 uint32_t is_opcode_length_11(uint32_t instruction, uint32_t* array_opcodes);
 
 uint32_t decode(uint32_t instruction); 
